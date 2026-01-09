@@ -3,16 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import Features from './components/Features';
-import FeedPreview from './components/FeedPreview';
-import DrivePreview from './components/DrivePreview';
-import SchedulePreview from './components/SchedulePreview';
+import FeatureShowcase from './components/FeatureShowcase';
 import SignupCTA from './components/SignupCTA';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import DrivePage from './components/DrivePage';
 import SettingsPage from './components/SettingsPage';
 import SignupPage from './components/SignupPage';
+import RecentFilesPage from './components/RecentFilesPage';
+import FoldersPage from './components/FoldersPage';
 
 const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings: () => void; navigateToDrive: () => void; }> = ({ onLogin, onSignup, onSettings, navigateToDrive }) => (
   <>
@@ -20,17 +19,8 @@ const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings
     <main>
       <Hero />
       <div className="max-w-screen-md mx-auto px-5 space-y-24 py-16">
-        <section id="features">
-          <Features />
-        </section>
-        <section id="feeds">
-          <FeedPreview />
-        </section>
-        <section id="drive">
-          <DrivePreview onSeeAll={navigateToDrive} />
-        </section>
-        <section id="schedule">
-          <SchedulePreview />
+        <section id="showcase">
+          <FeatureShowcase />
         </section>
         <section id="cta">
           <SignupCTA onSignup={onSignup} onLogin={onLogin} />
@@ -73,6 +63,16 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  const navigateToRecentFiles = () => {
+    navigate('/drive/recent');
+    window.scrollTo(0, 0);
+  };
+
+  const navigateToFolders = () => {
+    navigate('/drive/folders');
+    window.scrollTo(0, 0);
+  };
+
   const navigateToSettings = () => {
     navigate('/settings');
     window.scrollTo(0, 0);
@@ -82,13 +82,15 @@ const App: React.FC = () => {
     <div className="min-h-screen transition-colors duration-300">
       <Routes>
         <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToDrive={navigateToDrive} />} />
-        <Route path="/drive" element={<DrivePage onBack={navigateToHome} />} />
+        <Route path="/drive" element={<DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllFolders={navigateToFolders} />} />
+        <Route path="/drive/recent" element={<RecentFilesPage onBack={navigateToDrive} />} />
+        <Route path="/drive/folders" element={<FoldersPage onBack={navigateToDrive} />} />
         <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
         <Route path="/signup" element={<SignupPage />} />
       </Routes>
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setAuthModalOpen(false)}
       />
     </div>
   );

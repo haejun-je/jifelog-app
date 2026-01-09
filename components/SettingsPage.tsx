@@ -24,14 +24,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, theme, onThemeChang
         <section>
           <h3 className="text-xs font-black text-slate-400 dark:text-gray-400 uppercase tracking-widest mb-4 ml-2">테마 설정</h3>
           <div className="dark-card rounded-[32px] p-2 flex gap-2">
-            <button 
+            <button
               onClick={() => onThemeChange('light')}
               className={`flex-1 flex flex-col items-center justify-center py-6 rounded-3xl transition-all ${theme === 'light' ? 'bg-teal-500 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
             >
               <Sun size={24} className="mb-2" />
               <span className="text-sm font-bold">라이트</span>
             </button>
-            <button 
+            <button
               onClick={() => onThemeChange('dark')}
               className={`flex-1 flex flex-col items-center justify-center py-6 rounded-3xl transition-all ${theme === 'dark' ? 'bg-teal-500 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
             >
@@ -44,7 +44,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, theme, onThemeChang
         {/* Other Placeholder Sections */}
         <section className="space-y-3">
           <h3 className="text-xs font-black text-slate-400 dark:text-gray-400 uppercase tracking-widest mb-4 ml-2">앱 설정</h3>
-          
+
           <div className="dark-card rounded-[32px] overflow-hidden">
             {[
               { icon: <Bell size={20} />, label: '알림 설정', color: 'text-blue-500' },
@@ -52,8 +52,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, theme, onThemeChang
               { icon: <Monitor size={20} />, label: '디스플레이 환경', color: 'text-indigo-500' },
               { icon: <Info size={20} />, label: '버전 정보', color: 'text-slate-400', value: 'v1.2.0' },
             ].map((item, i) => (
-              <button 
-                key={i} 
+              <button
+                key={i}
                 className={`w-full p-5 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors ${i !== 3 ? 'border-b border-slate-200 dark:border-white/5' : ''}`}
               >
                 <div className="flex items-center gap-4">
