@@ -1,0 +1,9 @@
+
+{
+  "name": "JifeLog - Record Your Life Journey",
+  "description": "A comprehensive life logging service to record your journey, manage schedules, and archive memories through feeds, journals, and cloud storage.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
