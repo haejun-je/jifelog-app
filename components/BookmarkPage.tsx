@@ -95,7 +95,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     onClose={() => setSidebarOpen(false)}
                 />
 
-                <main className="flex-1 overflow-y-auto relative w-full pb-24">
+                <main className="flex-1 overflow-y-auto relative w-full pb-24 md:ml-64 md:pr-64">
                     {selectedBookmark ? (
                         <BookmarkDetail
                             bookmark={selectedBookmark}

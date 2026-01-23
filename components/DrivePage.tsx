@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ChevronLeft, Search, Star, Clock, Image, Video, FileText, Music,
-  Folder, MoreVertical, Trash2, HardDrive, ChevronRight, Menu
+  Folder, MoreVertical, Trash2, HardDrive, ChevronRight, Menu, Plus
 } from 'lucide-react';
 import BottomMenu from './BottomMenu';
 import SideMenu from './SideMenu';
@@ -16,10 +16,23 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      console.log('Selected file:', files[0]);
+      // Handle file upload logic here
+    }
+  };
 
   const categories = [
     { label: '즐겨찾기', icon: <Star size={20} />, color: 'text-amber-400' },
@@ -196,6 +209,20 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
           </div>
         </main>
       </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      <button
+        onClick={handleFileSelect}
+        className="fixed bottom-20 right-6 w-14 h-14 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 z-40"
+      >
+        <Plus size={28} strokeWidth={2.5} />
+      </button>
+
       <BottomMenu />
     </div>
   );

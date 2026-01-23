@@ -59,7 +59,7 @@ const NodesPage: React.FC<NodesPageProps> = ({ onBack }) => {
                 <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
                 {/* Main Content */}
-                <main className="flex-1 overflow-y-auto w-full relative md:pr-64 pb-24">
+                <main className="flex-1 overflow-y-auto w-full relative md:ml-64 md:pr-64 pb-24">
                     <div className="max-w-7xl mx-auto">
                         {/* Folders List */}
                         <div className={`p-5 flex-1 transition-all duration-500 ease-in-out ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
