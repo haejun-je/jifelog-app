@@ -36,9 +36,9 @@ const BookmarkSidebar: React.FC<BookmarkSidebarProps> = ({
                 <div className="flex items-center gap-2">
                     <button
                         onClick={onAddFolder}
-                        className="p-2 md:p-1 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                        className="hidden md:block p-1 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
                     >
-                        <Plus className="w-6 h-6 md:w-4 md:h-4" />
+                        <Plus size={16} />
                     </button>
                     {/* Mobile Close Button */}
                     <button
@@ -95,18 +95,28 @@ const BookmarkSidebar: React.FC<BookmarkSidebarProps> = ({
                     );
                 })}
             </nav>
+
+            {/* Footer (Mobile Only) */}
+            <div className="md:hidden p-5 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50">
+                <button
+                    onClick={onAddFolder}
+                    className="w-full py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-bold transition-colors"
+                >
+                    Add New Folder
+                </button>
+            </div>
         </div>
     );
 
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="w-64 bg-slate-50/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-white/5 h-full p-4 hidden md:block flex-shrink-0">
+            <aside className="fixed top-16 bottom-0 left-0 w-64 bg-slate-50/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-white/5 p-4 hidden md:block overflow-y-auto z-30">
                 {SidebarContent}
             </aside>
 
             {/* Mobile Sidebar (Drawer) */}
-            <div className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+            <div className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
                 {/* Backdrop */}
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 

@@ -10,9 +10,9 @@ import DrivePage from './components/DrivePage';
 import SettingsPage from './components/SettingsPage';
 import SignupPage from './components/SignupPage';
 import RecentFilesPage from './components/RecentFilesPage';
-import FoldersPage from './components/FoldersPage';
 import BookmarkPage from './components/BookmarkPage';
 import LoginPage from './components/LoginPage';
+import NodesPage from './components/NodesPage';
 
 const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings: () => void; navigateToDrive: () => void; }> = ({ onLogin, onSignup, onSettings, navigateToDrive }) => (
   <>
@@ -68,8 +68,8 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  const navigateToFolders = () => {
-    navigate('/drive/folders');
+  const navigateToNodes = () => {
+    navigate('/drive/nodes');
     window.scrollTo(0, 0);
   };
 
@@ -82,9 +82,9 @@ const App: React.FC = () => {
     <div className="min-h-screen transition-colors duration-300">
       <Routes>
         <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToDrive={navigateToDrive} />} />
-        <Route path="/drive" element={<DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllFolders={navigateToFolders} />} />
+        <Route path="/drive" element={<DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} />} />
         <Route path="/drive/recent" element={<RecentFilesPage onBack={navigateToDrive} />} />
-        <Route path="/drive/folders" element={<FoldersPage onBack={navigateToDrive} />} />
+        <Route path="/drive/nodes" element={<NodesPage onBack={navigateToDrive} />} />
         <Route path="/bookmarks" element={<BookmarkPage onBack={navigateToDrive} />} />
         <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
         <Route path="/signup" element={<SignupPage />} />

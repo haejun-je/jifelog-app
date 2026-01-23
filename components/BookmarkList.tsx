@@ -12,9 +12,14 @@ interface BookmarkListProps {
 
 const BookmarkList: React.FC<BookmarkListProps> = ({ folderName, count, bookmarks, onSelectBookmark }) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [isMounted, setIsMounted] = useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     return (
-        <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+        <div className={`p-6 md:p-8 max-w-7xl mx-auto space-y-8 transition-all duration-500 ease-in-out ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {/* Header & Controls */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

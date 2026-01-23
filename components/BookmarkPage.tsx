@@ -6,6 +6,7 @@ import BookmarkList from './BookmarkList';
 import BookmarkDetail from './BookmarkDetail';
 import AddBookmarkModal from './AddBookmarkModal';
 import { Bookmark } from './BookmarkCard';
+import BottomMenu from './BottomMenu';
 
 const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [selectedFolderId, setSelectedFolderId] = useState('all');
@@ -94,7 +95,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     onClose={() => setSidebarOpen(false)}
                 />
 
-                <main className="flex-1 overflow-y-auto relative w-full">
+                <main className="flex-1 overflow-y-auto relative w-full pb-24">
                     {selectedBookmark ? (
                         <BookmarkDetail
                             bookmark={selectedBookmark}
@@ -116,10 +117,10 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </main>
             </div>
 
-            {/* Floating Action Button (FAB) */}
+            {/* Floating Action Button (FAB) - Moved up to accommodate Bottom Menu */}
             <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="fixed bottom-6 right-6 w-14 h-14 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 z-40"
+                className="fixed bottom-20 right-6 w-14 h-14 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 z-40"
             >
                 {/* Plus Icon */}
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
@@ -130,6 +131,8 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
             />
+
+            <BottomMenu />
         </div>
     );
 };
