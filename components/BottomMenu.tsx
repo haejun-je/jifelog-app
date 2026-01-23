@@ -11,12 +11,12 @@ const BottomMenu: React.FC = () => {
         { label: '피드', icon: Layout, path: '/' },
         { label: '드라이브', icon: HardDrive, path: '/drive' },
         { label: 'AI 비서', icon: Bot, path: '/ai' },
-        { label: '일정', icon: Calendar, path: '/schedule' },
+        { label: '일정', icon: Calendar, path: '/calendar' },
         { label: '즐겨찾기', icon: Bookmark, path: '/bookmarks' },
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 pb-safe">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 pb-safe md:hidden">
             <div className="flex items-center justify-between h-16 max-w-screen-md mx-auto px-1">
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));

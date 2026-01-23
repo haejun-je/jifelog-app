@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import BookmarkHeader from './BookmarkHeader';
 import BookmarkSidebar from './BookmarkSidebar';
+import UniversalHeader from './UniversalHeader';
 import BookmarkList from './BookmarkList';
 import BookmarkDetail from './BookmarkDetail';
 import AddBookmarkModal from './AddBookmarkModal';
@@ -77,7 +77,8 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white flex flex-col transition-colors relative">
-            <BookmarkHeader
+            <UniversalHeader
+                title="즐겨찾기"
                 onBack={onBack}
                 onMenuClick={() => setSidebarOpen(true)}
             />
@@ -132,7 +133,6 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 onClose={() => setIsAddModalOpen(false)}
             />
 
-            <BottomMenu />
         </div>
     );
 };

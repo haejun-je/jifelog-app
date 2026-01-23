@@ -6,6 +6,8 @@ import {
 import BottomMenu from './BottomMenu';
 import SideMenu from './SideMenu';
 
+import UniversalHeader from './UniversalHeader';
+
 interface DrivePageProps {
   onBack: () => void;
   onSeeAllRecent?: () => void;
@@ -58,26 +60,11 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0f172a] transition-colors">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 h-16 px-5 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="p-2 -ml-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">드라이브</h1>
-        </div>
-
-        {/* Right: Menu Button (Mobile Only) */}
-        <button
-          onClick={() => setIsMenuOpen(true)}
-          className="md:hidden p-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        >
-          <Menu size={24} />
-        </button>
-      </header>
+      <UniversalHeader
+        title="드라이브"
+        onBack={onBack}
+        onMenuClick={() => setIsMenuOpen(true)}
+      />
 
       {/* Content Wrapper */}
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
@@ -223,7 +210,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         <Plus size={28} strokeWidth={2.5} />
       </button>
 
-      <BottomMenu />
+
     </div>
   );
 };

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { X, ChevronRight, ChevronDown, Folder, Plus } from 'lucide-react';
+import { Folder, ChevronDown, ChevronRight, Plus } from 'lucide-react';
+import ResponsiveSidebar from './ResponsiveSidebar';
+import SidebarItem from './SidebarItem';
+import SidebarSection from './SidebarSection';
 
 interface FolderNode {
     id: string;
@@ -58,22 +61,23 @@ const FolderTreeItem: React.FC<FolderTreeItemProps> = ({ node, level }) => {
 
     return (
         <div className="select-none">
-            <div
-                className={`flex items-center gap-2 py-2 px-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors ${level > 0 ? 'ml-4' : ''}`}
+            <SidebarItem
+                label={node.name}
+                icon={Folder}
+                indent={level}
                 onClick={handleToggle}
-            >
-                <div className="text-slate-400 dark:text-slate-500">
-                    {hasChildren ? (
-                        isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                leftElement={
+                    hasChildren ? (
+                        <div className="text-slate-400 dark:text-slate-500">
+                            {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                        </div>
                     ) : (
-                        <div className="w-4" /> // Spacer
-                    )}
-                </div>
-                <Folder size={18} className="text-teal-500" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{node.name}</span>
-            </div>
+                        <div className="w-3.5" />
+                    )
+                }
+            />
             {isOpen && hasChildren && (
-                <div className="border-l border-slate-200 dark:border-slate-800 ml-[21px]">
+                <div className="ml-2 border-l border-slate-200 dark:border-white/5">
                     {node.children!.map((child) => (
                         <FolderTreeItem key={child.id} node={child} level={level + 1} />
                     ))}
@@ -89,73 +93,46 @@ interface SideMenuProps {
 }
 
 const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
-    const MenuContent = (
-        <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="p-5 md:p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                <h2 className="text-lg md:text-sm font-bold text-slate-900 dark:text-white md:text-slate-400 md:dark:text-gray-500 md:uppercase md:tracking-widest">폴더 목록</h2>
-                <div className="flex items-center gap-2">
-                    {/* Desktop Add Button */}
-                    <button className="hidden md:block p-1 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
-                        <Plus size={16} />
-                    </button>
-
-                    {/* Mobile Close Button */}
-                    <button
-                        onClick={onClose}
-                        className="md:hidden p-2 -mr-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-2">
-                <div className="space-y-1">
-                    {initialFolders.map((node) => (
-                        <FolderTreeItem key={node.id} node={node} level={0} />
-                    ))}
-                </div>
-            </div>
-
-            {/* Footer (Mobile Only) */}
-            <div className="md:hidden p-5 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50">
-                <button className="w-full py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-bold transition-colors">
+    return (
+        <ResponsiveSidebar
+            title="스토리지 관리"
+            isOpen={isOpen}
+            onClose={onClose}
+            headerAction={
+                <button
+                    className="hidden md:block p-1 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                    title="새 폴더"
+                >
+                    <Plus size={16} />
+                </button>
+            }
+            footerAction={
+                <button className="w-full py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-bold transition-colors shadow-lg shadow-teal-500/20">
                     새 폴더 만들기
                 </button>
-            </div>
-        </div>
-    );
-
-    return (
-        <>
-            {/* Desktop Sidebar (Left side, persistent) */}
-            <aside className="fixed top-16 bottom-0 left-0 w-64 bg-slate-50/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-white/5 hidden md:block overflow-y-auto z-30">
-                {MenuContent}
-            </aside>
-
-            {/* Mobile Drawer (Right side, toggleable) */}
-            <div
-                className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                    }`}
+            }
+        >
+            <SidebarSection
+                title="폴더 목록"
+                action={
+                    <button className="p-1 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                        <Plus size={16} />
+                    </button>
+                }
             >
-                {/* Backdrop */}
-                <div
-                    className="absolute inset-0 bg-black/50"
-                    onClick={onClose}
-                />
+                {initialFolders.map((node) => (
+                    <FolderTreeItem key={node.id} node={node} level={0} />
+                ))}
+            </SidebarSection>
 
-                {/* Drawer */}
-                <div
-                    className={`absolute top-0 right-0 bottom-0 w-[280px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-white/5 shadow-2xl transition-transform duration-300 ease-out transform ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                        }`}
-                >
-                    {MenuContent}
-                </div>
+            <div className="mt-8 pt-4 border-t border-slate-200 dark:border-white/5 hidden md:block">
+                <button className="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    전체 폴더 보기
+                </button>
             </div>
-        </>
+        </ResponsiveSidebar>
     );
 };
+
 
 export default SideMenu;

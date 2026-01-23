@@ -13,6 +13,9 @@ import RecentFilesPage from './components/RecentFilesPage';
 import BookmarkPage from './components/BookmarkPage';
 import LoginPage from './components/LoginPage';
 import NodesPage from './components/NodesPage';
+import CalendarPage from './components/CalendarPage';
+
+import MainLayout from './components/MainLayout';
 
 const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings: () => void; navigateToDrive: () => void; }> = ({ onLogin, onSignup, onSettings, navigateToDrive }) => (
   <>
@@ -78,15 +81,23 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  const navigateToCalendar = () => {
+    navigate('/calendar');
+    window.scrollTo(0, 0);
+  };
+
   return (
+
     <div className="min-h-screen transition-colors duration-300">
       <Routes>
         <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToDrive={navigateToDrive} />} />
-        <Route path="/drive" element={<DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} />} />
-        <Route path="/drive/recent" element={<RecentFilesPage onBack={navigateToDrive} />} />
-        <Route path="/drive/nodes" element={<NodesPage onBack={navigateToDrive} />} />
-        <Route path="/bookmarks" element={<BookmarkPage onBack={navigateToDrive} />} />
+        <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
+        <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
+        <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
+        <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
+        <Route path="/calendar" element={<MainLayout><CalendarPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
+
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
