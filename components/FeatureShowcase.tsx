@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Bot, Calendar, HardDrive, Layout } from 'lucide-react';
+import { ArrowRight, Bot, Calendar, HardDrive, Layout, Bookmark } from 'lucide-react';
 
 const features = [
     {
@@ -12,13 +12,23 @@ const features = [
         align: "left"
     },
     {
+        title: "스마트한 웹 콘텐츠 관리",
+        description: "인상 깊은 웹페이지를 PDF로 영구 소장하세요. URL만 입력하면 깔끔하게 스크랩됩니다.",
+        image: "/bookmark_mockup.png",
+        icon: <Bookmark className="w-6 h-6" />,
+        color: "text-amber-400",
+        bgColor: "bg-amber-500/10",
+        align: "right",
+        isNew: true
+    },
+    {
         title: "안전하고 스마트한 클라우드",
         description: "모든 사진과 파일을 안전하게 보관하세요. 언제 어디서나 쉽게 접근할 수 있습니다.",
         image: "/drive_mockup.png",
         icon: <HardDrive className="w-6 h-6" />,
         color: "text-blue-400",
         bgColor: "bg-blue-500/10",
-        align: "right"
+        align: "left"
     },
     {
         title: "체계적인 일정 관리",
@@ -27,7 +37,7 @@ const features = [
         icon: <Calendar className="w-6 h-6" />,
         color: "text-purple-400",
         bgColor: "bg-purple-500/10",
-        align: "left"
+        align: "right"
     },
     {
         title: "AI 데일리 어시스턴트",
@@ -36,7 +46,7 @@ const features = [
         icon: <Bot className="w-6 h-6" />,
         color: "text-rose-400",
         bgColor: "bg-rose-500/10",
-        align: "right",
+        align: "left",
         isNew: true
     }
 ];

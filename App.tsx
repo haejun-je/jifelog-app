@@ -6,12 +6,13 @@ import Hero from './components/Hero';
 import FeatureShowcase from './components/FeatureShowcase';
 import SignupCTA from './components/SignupCTA';
 import Footer from './components/Footer';
-import AuthModal from './components/AuthModal';
 import DrivePage from './components/DrivePage';
 import SettingsPage from './components/SettingsPage';
 import SignupPage from './components/SignupPage';
 import RecentFilesPage from './components/RecentFilesPage';
 import FoldersPage from './components/FoldersPage';
+import BookmarkPage from './components/BookmarkPage';
+import LoginPage from './components/LoginPage';
 
 const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings: () => void; navigateToDrive: () => void; }> = ({ onLogin, onSignup, onSettings, navigateToDrive }) => (
   <>
@@ -32,7 +33,6 @@ const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings
 );
 
 const App: React.FC = () => {
-  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const navigate = useNavigate();
 
@@ -46,7 +46,7 @@ const App: React.FC = () => {
   }, [theme]);
 
   const openLogin = () => {
-    setAuthModalOpen(true);
+    navigate('/login');
   };
 
   const openSignup = () => {
@@ -85,13 +85,11 @@ const App: React.FC = () => {
         <Route path="/drive" element={<DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllFolders={navigateToFolders} />} />
         <Route path="/drive/recent" element={<RecentFilesPage onBack={navigateToDrive} />} />
         <Route path="/drive/folders" element={<FoldersPage onBack={navigateToDrive} />} />
+        <Route path="/bookmarks" element={<BookmarkPage onBack={navigateToDrive} />} />
         <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
     </div>
   );
 };
