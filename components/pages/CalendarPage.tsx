@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import UniversalHeader from './UniversalHeader';
-import CalendarSidebar, { CalendarCategory } from './CalendarSidebar';
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, AlignLeft, Plus, X, Check, Calendar as CalendarIcon } from 'lucide-react';
+import UniversalHeader from '../layout/UniversalHeader';
+import CalendarSidebar, { CalendarCategory } from '../calendar/CalendarSidebar';
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, AlignLeft, Plus, X, Check, Trash, Calendar as CalendarIcon } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -175,7 +175,7 @@ const CustomCalendarView: React.FC<{
                                 {d.day}
                             </span>
                             <div className="flex flex-col gap-0.5">
-                                {Array.from({ length: Math.max(3, dayLanes.length) }).map((_, laneIdx) => {
+                                {Array.from({ length: Math.max(3, Math.min(dayLanes.length, 4)) }).map((_, laneIdx) => {
                                     const s = dayLanes[laneIdx];
                                     if (!s) return <div key={laneIdx} className="h-4" />;
 
@@ -191,6 +191,7 @@ const CustomCalendarView: React.FC<{
                                     const isWeekStart = i % 7 === 0;
 
                                     if (s.allDay || isMultiDay) {
+                                        const showTitle = isStart || isWeekStart;
                                         return (
                                             <div
                                                 key={s.id}
@@ -198,29 +199,34 @@ const CustomCalendarView: React.FC<{
                                                     e.stopPropagation();
                                                     onEventClick(s);
                                                 }}
-                                                className={`h-4 text-[9px] px-1.5 py-0.5 truncate text-white font-bold opacity-90 transition-transform active:scale-95 relative ${isStart ? 'rounded-l-[5px] ml-0.5' : ''} ${isEnd ? 'rounded-r-[5px] mr-1' : 'w-[calc(100%+1px)] z-10'}`}
+                                                className={`h-4 text-[9px] py-0.5 truncate text-white font-bold opacity-90 transition-transform active:scale-95 relative ${!isEnd ? 'w-[calc(100%+1px)] z-10' : 'w-full'} ${isStart ? 'rounded-l-[5px]' : ''} ${isEnd ? 'rounded-r-[5px]' : ''} ${showTitle ? 'px-1.5' : 'px-0'}`}
                                                 style={{ backgroundColor: cal?.color || '#ccc' }}
                                             >
-                                                {(isStart || isWeekStart) && s.title}
-                                            </div>
-                                        );
-                                    } else {
-                                        // Timed event - short bar / text style
-                                        return (
-                                            <div
-                                                key={s.id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onEventClick(s);
-                                                }}
-                                                className="h-4 flex items-center gap-1 px-1 text-[9px] font-bold text-slate-700 dark:text-slate-300 transition-transform active:scale-95"
-                                            >
-                                                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: cal?.color }} />
-                                                <span className="truncate">{s.title}</span>
+                                                {showTitle && s.title}
                                             </div>
                                         );
                                     }
+
+                                    const barColor = cal?.color || '#ccc';
+                                    return (
+                                        <div
+                                            key={s.id}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEventClick(s);
+                                            }}
+                                            className="h-4 flex items-center gap-1 text-[9px] font-bold text-slate-700 dark:text-slate-300 transition-transform active:scale-95"
+                                        >
+                                            <div className="w-0.5 h-3 flex-shrink-0" style={{ backgroundColor: barColor }} />
+                                            <span className="truncate">{s.title}</span>
+                                        </div>
+                                    );
                                 })}
+                                {dayLanes.length > 4 && (
+                                    <div className="h-4 text-[9px] font-bold text-slate-400 dark:text-slate-500 flex items-center pl-1">
+                                        ...
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );
@@ -248,13 +254,16 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
     const [isAddCalendarModalOpen, setIsAddCalendarModalOpen] = useState(false);
+    const [isDayScheduleModalOpen, setIsDayScheduleModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+    const [daySchedules, setDaySchedules] = useState<Schedule[]>([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [direction, setDirection] = useState(0);
 
     const mainContentRef = useRef<HTMLDivElement>(null);
     const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+    const sidebarHistoryRef = useRef(false);
 
     // Scroll interpolation states
     const [calendarHeight, setCalendarHeight] = useState(window.innerHeight - 192); // Adjusted for listRoom 64 (64+64+64)
@@ -264,16 +273,85 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setCalendars(prev => prev.map(c => c.id === id ? { ...c, isVisible: !c.isVisible } : c));
     };
 
+    const openSidebar = () => {
+        setSidebarOpen(true);
+        if (!sidebarHistoryRef.current) {
+            window.history.pushState({ calendarSidebar: true }, '');
+            sidebarHistoryRef.current = true;
+        }
+    };
+
+    const closeSidebar = () => {
+        if (sidebarHistoryRef.current) {
+            window.history.back();
+        } else {
+            setSidebarOpen(false);
+        }
+    };
+
+    const getSchedulesForDate = (date: Date) => {
+        const target = new Date(date);
+        target.setHours(0, 0, 0, 0);
+
+        return allVisibleSchedules
+            .filter(s => {
+                const start = new Date(s.start);
+                const end = new Date(s.end);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(0, 0, 0, 0);
+                return target >= start && target <= end;
+            })
+            .sort((a, b) => a.start.localeCompare(b.start));
+    };
+
     const handleDateClick = (date: Date) => {
+        const matches = getSchedulesForDate(date);
+
         setSelectedDate(date);
         setEditingSchedule(null);
-        setIsScheduleModalOpen(true);
+        if (matches.length > 0) {
+            setDaySchedules(matches);
+            setIsDayScheduleModalOpen(true);
+            window.history.pushState({ dayScheduleModal: true }, '');
+        } else {
+            setIsScheduleModalOpen(true);
+        }
     };
 
     const handleEventClick = (schedule: Schedule) => {
+        const eventDate = new Date(schedule.start);
+        const matches = getSchedulesForDate(eventDate);
+
+        setSelectedDate(eventDate);
+        setEditingSchedule(null);
+        setDaySchedules(matches);
+        setIsDayScheduleModalOpen(true);
+        window.history.pushState({ dayScheduleModal: true }, '');
+    };
+
+    const handleDayScheduleSelect = (schedule: Schedule) => {
         setEditingSchedule(schedule);
+        setIsDayScheduleModalOpen(false);
         setIsScheduleModalOpen(true);
     };
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isSidebarOpen) {
+                setSidebarOpen(false);
+                sidebarHistoryRef.current = false;
+                return;
+            }
+            if (isDayScheduleModalOpen) {
+                setIsDayScheduleModalOpen(false);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [isDayScheduleModalOpen, isSidebarOpen]);
 
     const handleSwipe = (dir: 'prev' | 'next') => {
         const newDate = new Date(currentDate);
@@ -375,7 +453,8 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <UniversalHeader
                 title="캘린더"
                 onBack={onBack}
-                onMenuClick={() => setSidebarOpen(true)}
+                showBack={false}
+                onMenuClick={openSidebar}
             />
 
             {/* Content Wrapper */}
@@ -385,7 +464,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     onToggleVisibility={toggleCalendarVisibility}
                     onAddCalendar={() => setIsAddCalendarModalOpen(true)}
                     isOpen={isSidebarOpen}
-                    onClose={() => setSidebarOpen(false)}
+                    onClose={closeSidebar}
                 />
 
                 {/* Main Content */}
@@ -536,6 +615,20 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         }}
                     />
                 )}
+                {isDayScheduleModalOpen && selectedDate && (
+                    <DayScheduleModal
+                        date={selectedDate}
+                        schedules={daySchedules}
+                        calendars={calendars}
+                        onClose={() => setIsDayScheduleModalOpen(false)}
+                        onSelectSchedule={handleDayScheduleSelect}
+                        onCreateSchedule={() => {
+                            setEditingSchedule(null);
+                            setIsDayScheduleModalOpen(false);
+                            setIsScheduleModalOpen(true);
+                        }}
+                    />
+                )}
                 {isAddCalendarModalOpen && (
                     <AddCalendarModal
                         isOpen={isAddCalendarModalOpen}
@@ -576,6 +669,89 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 };
 
 // --- Modals (ScheduleModal, AddCalendarModal) ---
+const DayScheduleModal: React.FC<{
+    date: Date;
+    schedules: Schedule[];
+    calendars: CalendarCategory[];
+    onClose: () => void;
+    onSelectSchedule: (schedule: Schedule) => void;
+    onCreateSchedule: () => void;
+}> = ({ date, schedules, calendars, onClose, onSelectSchedule, onCreateSchedule }) => {
+    const formatHeader = (value: Date) => {
+        return value.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+    };
+
+    const formatTime = (schedule: Schedule) => {
+        if (schedule.allDay) return '종일';
+        const start = new Date(schedule.start);
+        const end = new Date(schedule.end);
+        const startLabel = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const endLabel = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        return `${startLabel} - ${endLabel}`;
+    };
+
+    return (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 16 }}
+                className="relative w-full max-w-md h-[70vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            >
+                <div className="p-5 border-b border-slate-200 dark:border-white/5 flex items-center">
+                    <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">일정 목록</p>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white">{formatHeader(date)}</h3>
+                    </div>
+                </div>
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 no-scrollbar">
+                    {schedules.map((schedule) => {
+                        const calendar = calendars.find(c => c.id === schedule.calendarId);
+                        return (
+                            <button
+                                key={schedule.id}
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    onSelectSchedule(schedule);
+                                }}
+                                className="w-full text-left bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-200 dark:border-white/5 hover:border-teal-500/50 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-10 rounded-full" style={{ backgroundColor: calendar?.color }} />
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">{schedule.title}</h4>
+                                        <div className="text-[11px] text-slate-500 dark:text-gray-400 mt-1">
+                                            {formatTime(schedule)}
+                                            {schedule.location && ` • ${schedule.location}`}
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="p-4 border-t border-slate-200 dark:border-white/5">
+                    <button
+                        onClick={onCreateSchedule}
+                        className="w-full h-12 border border-slate-300 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-700 hover:text-teal-500 hover:border-teal-400 dark:hover:text-teal-400 transition-colors"
+                    >
+                        <span className="w-8 h-8 rounded-full border border-current flex items-center justify-center">
+                            <Plus size={16} />
+                        </span>
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
 const AddCalendarModal: React.FC<{
     isOpen: boolean;
     onClose: () => void;
@@ -630,39 +806,108 @@ const ScheduleModal: React.FC<{
     const [calendarId, setCalendarId] = useState(editingSchedule?.calendarId || calendars[0]?.id);
     const [description, setDescription] = useState(editingSchedule?.description || '');
     const [location, setLocation] = useState(editingSchedule?.location || '');
+    const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-slate-900">
-                    <button onClick={onClose} className="p-2 -ml-2 rounded-full"><X size={20} /></button>
+            <motion.div
+                initial={{ opacity: 0, y: 120 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 120 }}
+                className="relative w-full max-w-md md:max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+                <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-white dark:bg-slate-900">
+                    <div className="w-6" />
                     <h2 className="text-lg font-black">{editingSchedule ? '일정 수정' : '새 일정 등록'}</h2>
-                    <button onClick={() => onSave({ title, start, end, allDay, calendarId, description, location })} disabled={!title} className="text-teal-600 font-bold disabled:opacity-30">저장</button>
+                    {editingSchedule ? (
+                        <button
+                            onClick={() => setDeleteConfirmOpen(true)}
+                            className="p-2 -mr-2 rounded-full text-slate-500 hover:text-red-500 transition-colors"
+                            aria-label="일정 삭제"
+                        >
+                            <Trash size={18} />
+                        </button>
+                    ) : (
+                        <div className="w-6" />
+                    )}
                 </div>
-                <div className="p-6 space-y-6 overflow-y-auto">
-                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="일정 제목" className="w-full bg-transparent text-2xl font-black outline-none" />
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4"><Clock className="text-slate-400" size={20} /><span className="text-sm font-medium">종일</span></div>
-                            <button onClick={() => setAllDay(!allDay)} className={`w-12 h-6 rounded-full transition-colors relative ${allDay ? 'bg-teal-500' : 'bg-slate-200 dark:bg-slate-800'}`}><div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allDay ? 'left-7' : 'left-1'}`} /></button>
+                <div className="flex-1 overflow-y-auto">
+                    <div className="p-6 space-y-6 pb-28">
+                        <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="일정 제목" className="w-full bg-transparent text-2xl font-black outline-none" />
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4"><Clock className="text-slate-400" size={20} /><span className="text-sm font-medium">종일</span></div>
+                                <button onClick={() => setAllDay(!allDay)} className={`w-12 h-6 rounded-full transition-colors relative ${allDay ? 'bg-teal-500' : 'bg-slate-200 dark:bg-slate-800'}`}><div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allDay ? 'left-7' : 'left-1'}`} /></button>
+                            </div>
+                            <div className="pl-9 space-y-3">
+                                <div className="flex items-center justify-between"><span className="text-sm text-slate-500">시작</span><input type={allDay ? "date" : "datetime-local"} value={allDay ? start.split('T')[0] : start} onChange={e => setStart(e.target.value)} className="bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-sm outline-none" /></div>
+                                <div className="flex items-center justify-between"><span className="text-sm text-slate-500">종료</span><input type={allDay ? "date" : "datetime-local"} value={allDay ? end.split('T')[0] : end} onChange={e => setEnd(e.target.value)} className="bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-sm outline-none" /></div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 pl-9">
+                                {calendars.map(cal => (
+                                    <button key={cal.id} onClick={() => setCalendarId(cal.id)} className={`px-3 py-1.5 rounded-full text-xs font-bold ${calendarId === cal.id ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>{cal.name}</button>
+                                ))}
+                            </div>
+                            <div className="flex items-center gap-4"><MapPin className="text-slate-400" size={20} /><input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="장소 추가" className="flex-1 text-sm outline-none bg-transparent" /></div>
+                            <div className="flex items-start gap-4"><AlignLeft className="text-slate-400" size={20} /><textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="메모 추가..." className="flex-1 text-sm outline-none bg-transparent resize-none h-24" /></div>
                         </div>
-                        <div className="pl-9 space-y-3">
-                            <div className="flex items-center justify-between"><span className="text-sm text-slate-500">시작</span><input type={allDay ? "date" : "datetime-local"} value={allDay ? start.split('T')[0] : start} onChange={e => setStart(e.target.value)} className="bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-sm outline-none" /></div>
-                            <div className="flex items-center justify-between"><span className="text-sm text-slate-500">종료</span><input type={allDay ? "date" : "datetime-local"} value={allDay ? end.split('T')[0] : end} onChange={e => setEnd(e.target.value)} className="bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-sm outline-none" /></div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 pl-9">
-                            {calendars.map(cal => (
-                                <button key={cal.id} onClick={() => setCalendarId(cal.id)} className={`px-3 py-1.5 rounded-full text-xs font-bold ${calendarId === cal.id ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>{cal.name}</button>
-                            ))}
-                        </div>
-                        <div className="flex items-center gap-4"><MapPin className="text-slate-400" size={20} /><input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="장소 추가" className="flex-1 text-sm outline-none bg-transparent" /></div>
-                        <div className="flex items-start gap-4"><AlignLeft className="text-slate-400" size={20} /><textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="메모 추가..." className="flex-1 text-sm outline-none bg-transparent resize-none h-24" /></div>
                     </div>
                 </div>
-                {editingSchedule && (
-                    <div className="p-6 pt-0"><button onClick={() => onDelete?.(editingSchedule.id)} className="w-full py-3 text-red-500 bg-red-50 dark:bg-red-500/10 rounded-xl font-bold">일정 삭제</button></div>
-                )}
+                <div className="p-4 border-t border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900 grid grid-cols-2 gap-3">
+                    <button
+                        onClick={() => onSave({ title, start, end, allDay, calendarId, description, location })}
+                        disabled={!title}
+                        className="py-3 rounded-xl font-bold bg-teal-500 text-white disabled:opacity-30"
+                    >
+                        저장
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="py-3 rounded-xl font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    >
+                        닫기
+                    </button>
+                </div>
+                <AnimatePresence>
+                    {editingSchedule && isDeleteConfirmOpen && (
+                        <div className="absolute inset-0 z-30 flex items-center justify-center">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setDeleteConfirmOpen(false)}
+                                className="absolute inset-0 bg-black/50"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                className="relative w-full max-w-xs bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-5"
+                            >
+                                <h3 className="text-base font-black text-slate-900 dark:text-slate-100">정말 삭제할까요?</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">삭제하면 복구할 수 없습니다.</p>
+                                <div className="mt-5 grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setDeleteConfirmOpen(false)}
+                                        className="py-2.5 rounded-xl font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                                    >
+                                        취소
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            onDelete?.(editingSchedule.id);
+                                            setDeleteConfirmOpen(false);
+                                        }}
+                                        className="py-2.5 rounded-xl font-bold bg-red-500 text-white"
+                                    >
+                                        삭제
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </div>
     );

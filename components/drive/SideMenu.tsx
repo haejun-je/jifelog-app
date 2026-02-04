@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Folder, ChevronDown, ChevronRight, Plus } from 'lucide-react';
-import ResponsiveSidebar from './ResponsiveSidebar';
-import SidebarItem from './SidebarItem';
-import SidebarSection from './SidebarSection';
+import { Folder, ChevronDown, ChevronRight, Plus, ArrowRight } from 'lucide-react';
+import ResponsiveSidebar from '../sidebars/ResponsiveSidebar';
+import SidebarItem from '../sidebars/SidebarItem';
+import SidebarSection from '../sidebars/SidebarSection';
 
 interface FolderNode {
     id: string;
@@ -47,13 +47,18 @@ const initialFolders: FolderNode[] = [
 interface FolderTreeItemProps {
     node: FolderNode;
     level: number;
+    selectedId: string | null;
+    onSelect: (id: string) => void;
 }
 
-const FolderTreeItem: React.FC<FolderTreeItemProps> = ({ node, level }) => {
+const FolderTreeItem: React.FC<FolderTreeItemProps> = ({ node, level, selectedId, onSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
     const hasChildren = node.children && node.children.length > 0;
 
+    const isSelected = selectedId === node.id;
+
     const handleToggle = () => {
+        onSelect(node.id);
         if (hasChildren) {
             setIsOpen(!isOpen);
         }
@@ -66,6 +71,7 @@ const FolderTreeItem: React.FC<FolderTreeItemProps> = ({ node, level }) => {
                 icon={Folder}
                 indent={level}
                 onClick={handleToggle}
+                active={isSelected}
                 leftElement={
                     hasChildren ? (
                         <div className="text-slate-400 dark:text-slate-500">
@@ -75,11 +81,30 @@ const FolderTreeItem: React.FC<FolderTreeItemProps> = ({ node, level }) => {
                         <div className="w-3.5" />
                     )
                 }
+                rightElement={
+                    isSelected ? (
+                        <button
+                            className="w-6 h-3 rounded-full text-slate-400 dark:text-slate-500 flex items-center justify-center"
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                            }}
+                        >
+                            <ArrowRight size={14} />
+                        </button>
+                    ) : null
+                }
             />
             {isOpen && hasChildren && (
                 <div className="ml-2 border-l border-slate-200 dark:border-white/5">
                     {node.children!.map((child) => (
-                        <FolderTreeItem key={child.id} node={child} level={level + 1} />
+                        <FolderTreeItem
+                            key={child.id}
+                            node={child}
+                            level={level + 1}
+                            selectedId={selectedId}
+                            onSelect={onSelect}
+                        />
                     ))}
                 </div>
             )}
@@ -93,6 +118,7 @@ interface SideMenuProps {
 }
 
 const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
+    const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
     return (
         <ResponsiveSidebar
             title="스토리지 관리"
@@ -121,7 +147,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
                 }
             >
                 {initialFolders.map((node) => (
-                    <FolderTreeItem key={node.id} node={node} level={0} />
+                    <FolderTreeItem
+                        key={node.id}
+                        node={node}
+                        level={0}
+                        selectedId={selectedFolderId}
+                        onSelect={setSelectedFolderId}
+                    />
                 ))}
             </SidebarSection>
 

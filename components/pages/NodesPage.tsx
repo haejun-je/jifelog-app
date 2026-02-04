@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Folder, MoreVertical, Search, Menu } from 'lucide-react';
-import SideMenu from './SideMenu';
-import BottomMenu from './BottomMenu';
+import SideMenu from '../drive/SideMenu';
+import BottomMenu from '../navigation/BottomMenu';
 
-import UniversalHeader from './UniversalHeader';
+import UniversalHeader from '../layout/UniversalHeader';
 
 interface NodesPageProps {
     onBack: () => void;

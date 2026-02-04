@@ -1,7 +1,7 @@
 
 import React from 'react';
 import GlobalSidebar from './GlobalSidebar';
-import BottomMenu from './BottomMenu';
+import BottomMenu from '../navigation/BottomMenu';
 
 interface MainLayoutProps {
     children: React.ReactNode;

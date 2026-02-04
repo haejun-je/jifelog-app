@@ -1,30 +1,34 @@
 
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import FeatureShowcase from './components/FeatureShowcase';
-import SignupCTA from './components/SignupCTA';
-import Footer from './components/Footer';
-import DrivePage from './components/DrivePage';
-import SettingsPage from './components/SettingsPage';
-import SignupPage from './components/SignupPage';
-import RecentFilesPage from './components/RecentFilesPage';
-import BookmarkPage from './components/BookmarkPage';
-import LoginPage from './components/LoginPage';
-import NodesPage from './components/NodesPage';
-import CalendarPage from './components/CalendarPage';
+import Header from './components/marketing/Header';
+import Hero from './components/marketing/Hero';
+import FeatureShowcase from './components/marketing/FeatureShowcase';
+import SignupCTA from './components/marketing/SignupCTA';
+import Footer from './components/marketing/Footer';
+import InstallPrompt from './components/marketing/InstallPrompt';
+import DrivePage from './components/pages/DrivePage';
+import SettingsPage from './components/pages/SettingsPage';
+import SignupPage from './components/pages/SignupPage';
+import RecentFilesPage from './components/pages/RecentFilesPage';
+import BookmarkPage from './components/pages/BookmarkPage';
+import LoginPage from './components/pages/LoginPage';
+import NodesPage from './components/pages/NodesPage';
+import CalendarPage from './components/pages/CalendarPage';
 
-import MainLayout from './components/MainLayout';
+import MainLayout from './components/layout/MainLayout';
 
-const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings: () => void; navigateToDrive: () => void; }> = ({ onLogin, onSignup, onSettings, navigateToDrive }) => (
+const HomePage: React.FC<{ onLogin: () => void; onSignup: () => void; onSettings: () => void; navigateToDrive: () => void; navigateToCalendar: () => void; navigateToBookmark: () => void; }> = ({ onLogin, onSignup, onSettings, navigateToDrive, navigateToCalendar, navigateToBookmark }) => (
   <>
     <Header onLogin={onLogin} onSignup={onSignup} onSettings={onSettings} />
     <main>
       <Hero />
       <div className="max-w-screen-md mx-auto px-5 space-y-24 py-16">
+        <div className="flex justify-center">
+          <InstallPrompt />
+        </div>
         <section id="showcase">
-          <FeatureShowcase />
+          <FeatureShowcase onDrive={navigateToDrive} onCalendar={navigateToCalendar} onBookmark={navigateToBookmark} />
         </section>
         <section id="cta">
           <SignupCTA onSignup={onSignup} onLogin={onLogin} />
@@ -86,11 +90,16 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  const navigateToBookmark = () => {
+    navigate('/bookmarks');
+    window.scrollTo(0, 0);
+  };
+
   return (
 
     <div className="min-h-screen transition-colors duration-300">
       <Routes>
-        <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToDrive={navigateToDrive} />} />
+        <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToDrive={navigateToDrive} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} />} />
         <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
         <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />

@@ -45,7 +45,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
     return (
         <>
             {/* Desktop View: Fixed Side Panel */}
-            <aside className={`fixed top-16 bottom-0 ${desktopClasses} w-64 md:left-16 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 p-4 hidden md:block overflow-y-auto z-30 transition-colors`}>
+            <aside className={`fixed top-16 bottom-0 ${desktopClasses} w-64 ${desktopPosition === 'left' ? 'md:left-16' : 'md:right-0'} bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 p-4 hidden md:block overflow-y-auto z-30 transition-colors`}>
                 {SidebarContent}
             </aside>
 
@@ -62,7 +62,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
 
                 {/* Drawer */}
                 <aside
-                    className={`absolute right-0 top-0 bottom-0 w-[80%] max-w-xs bg-white dark:bg-slate-900 p-6 shadow-2xl transition-transform duration-300 border-l border-slate-200 dark:border-white/5 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                    className={`absolute left-0 top-0 bottom-0 w-[80%] max-w-xs bg-white dark:bg-slate-900 p-6 shadow-2xl transition-transform duration-300 border-r border-slate-200 dark:border-white/5 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                         }`}
                 >
                     {SidebarContent}

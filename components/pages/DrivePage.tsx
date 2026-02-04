@@ -3,10 +3,11 @@ import {
   ChevronLeft, Search, Star, Clock, Image, Video, FileText, Music,
   Folder, MoreVertical, Trash2, HardDrive, ChevronRight, Menu, Plus
 } from 'lucide-react';
-import BottomMenu from './BottomMenu';
-import SideMenu from './SideMenu';
+import BottomMenu from '../navigation/BottomMenu';
+import SideMenu from '../drive/SideMenu';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import UniversalHeader from './UniversalHeader';
+import UniversalHeader from '../layout/UniversalHeader';
 
 interface DrivePageProps {
   onBack: () => void;
@@ -19,10 +20,41 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const menuHistoryRef = useRef(false);
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      if (isMenuOpen) {
+        setIsMenuOpen(false);
+        menuHistoryRef.current = false;
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isMenuOpen]);
+
+  const openMenu = () => {
+    setIsMenuOpen(true);
+    if (!menuHistoryRef.current) {
+      window.history.pushState({ driveMenu: true }, '');
+      menuHistoryRef.current = true;
+    }
+  };
+
+  const closeMenu = () => {
+    if (menuHistoryRef.current) {
+      window.history.back();
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -63,13 +95,14 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
       <UniversalHeader
         title="드라이브"
         onBack={onBack}
-        onMenuClick={() => setIsMenuOpen(true)}
+        showBack={false}
+        onMenuClick={openMenu}
       />
 
       {/* Content Wrapper */}
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
         {/* Sidebar (Responsive) */}
-        <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+        <SideMenu isOpen={isMenuOpen} onClose={closeMenu} />
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto w-full relative md:ml-64 md:pr-64">
@@ -203,12 +236,20 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         className="hidden"
       />
 
-      <button
-        onClick={handleFileSelect}
-        className="fixed bottom-20 right-6 w-14 h-14 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 z-40"
+
+
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => {
+          handleFileSelect()
+        }}
+        className="fixed right-6 bottom-24 z-30 w-14 h-14 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-teal-600 transition-colors"
       >
-        <Plus size={28} strokeWidth={2.5} />
-      </button>
+        <Plus size={28} />
+      </motion.button>
 
 
     </div>

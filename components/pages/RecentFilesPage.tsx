@@ -28,7 +28,7 @@ const RecentFilesPage: React.FC<RecentFilesPageProps> = ({ onBack }) => {
     ];
 
     return (
-        <div className="max-w-screen-md mx-auto min-h-screen flex flex-col bg-slate-50 dark:bg-[#0f172a] transition-colors pt-16">
+        <div className="max-w-5xl mx-auto w-full min-h-screen flex flex-col bg-slate-50 dark:bg-[#0f172a] transition-colors pt-16">
             {/* Header */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 px-5 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-4">

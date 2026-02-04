@@ -1,18 +1,22 @@
 
-import React, { useState } from 'react';
-import BookmarkSidebar from './BookmarkSidebar';
-import UniversalHeader from './UniversalHeader';
-import BookmarkList from './BookmarkList';
-import BookmarkDetail from './BookmarkDetail';
-import AddBookmarkModal from './AddBookmarkModal';
-import { Bookmark } from './BookmarkCard';
-import BottomMenu from './BottomMenu';
+import React, { useEffect, useRef, useState } from 'react';
+import BookmarkSidebar from '../bookmarks/BookmarkSidebar';
+import UniversalHeader from '../layout/UniversalHeader';
+import BookmarkList from '../bookmarks/BookmarkList';
+import BookmarkDetail from '../bookmarks/BookmarkDetail';
+import AddBookmarkModal from '../bookmarks/AddBookmarkModal';
+import { Bookmark } from '../bookmarks/BookmarkCard';
+import BottomMenu from '../navigation/BottomMenu';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, AlignLeft, Plus, X, Check, Calendar as CalendarIcon } from 'lucide-react';
+
 
 const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [selectedFolderId, setSelectedFolderId] = useState('all');
     const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const sidebarHistoryRef = useRef(false);
 
     // Mock data - Folders
     const folders = [
@@ -73,6 +77,36 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setSelectedBookmark(null);
     };
 
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isSidebarOpen) {
+                setSidebarOpen(false);
+                sidebarHistoryRef.current = false;
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [isSidebarOpen]);
+
+    const openSidebar = () => {
+        setSidebarOpen(true);
+        if (!sidebarHistoryRef.current) {
+            window.history.pushState({ bookmarkSidebar: true }, '');
+            sidebarHistoryRef.current = true;
+        }
+    };
+
+    const closeSidebar = () => {
+        if (sidebarHistoryRef.current) {
+            window.history.back();
+        } else {
+            setSidebarOpen(false);
+        }
+    };
+
     const selectedFolder = folders.find(f => f.id === selectedFolderId) || folders[0];
 
     return (
@@ -80,7 +114,8 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <UniversalHeader
                 title="즐겨찾기"
                 onBack={onBack}
-                onMenuClick={() => setSidebarOpen(true)}
+                showBack={false}
+                onMenuClick={openSidebar}
             />
 
             <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
@@ -93,7 +128,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     }}
                     onAddFolder={() => console.log('Add folder clicked')}
                     isOpen={isSidebarOpen}
-                    onClose={() => setSidebarOpen(false)}
+                    onClose={closeSidebar}
                 />
 
                 <main className="flex-1 overflow-y-auto relative w-full pb-24 md:ml-64 md:pr-64">
@@ -119,13 +154,21 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             {/* Floating Action Button (FAB) - Moved up to accommodate Bottom Menu */}
-            <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="fixed bottom-20 right-6 w-14 h-14 bg-teal-500 hover:bg-teal-600 text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 z-40"
+
+
+            <motion.button
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                    setIsAddModalOpen(true)
+                }}
+                className="fixed right-6 bottom-24 z-30 w-14 h-14 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-teal-600 transition-colors"
             >
-                {/* Plus Icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-            </button>
+                <Plus size={28} />
+            </motion.button>
+
 
 
             <AddBookmarkModal

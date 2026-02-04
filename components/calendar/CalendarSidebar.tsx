@@ -1,8 +1,8 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-import ResponsiveSidebar from './ResponsiveSidebar';
-import SidebarItem from './SidebarItem';
-import SidebarSection from './SidebarSection';
+import ResponsiveSidebar from '../sidebars/ResponsiveSidebar';
+import SidebarItem from '../sidebars/SidebarItem';
+import SidebarSection from '../sidebars/SidebarSection';
 
 export interface CalendarCategory {
     id: string;

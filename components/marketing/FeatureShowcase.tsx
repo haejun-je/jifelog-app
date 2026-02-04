@@ -3,6 +3,7 @@ import { ArrowRight, Bot, Calendar, HardDrive, Layout, Bookmark } from 'lucide-r
 
 const features = [
     {
+        key: 'feed',
         title: "아름답게 기록하는 당신의 일상",
         description: "소중한 순간들을 사진과 글로 남기세요. 당신만의 감성이 담긴 피드가 완성됩니다.",
         image: "/feed_mockup.png",
@@ -12,6 +13,7 @@ const features = [
         align: "left"
     },
     {
+        key: 'bookmark',
         title: "스마트한 웹 콘텐츠 관리",
         description: "인상 깊은 웹페이지를 PDF로 영구 소장하세요. URL만 입력하면 깔끔하게 스크랩됩니다.",
         image: "/bookmark_mockup.png",
@@ -22,6 +24,7 @@ const features = [
         isNew: true
     },
     {
+        key: 'drive',
         title: "안전하고 스마트한 클라우드",
         description: "모든 사진과 파일을 안전하게 보관하세요. 언제 어디서나 쉽게 접근할 수 있습니다.",
         image: "/drive_mockup.png",
@@ -31,6 +34,7 @@ const features = [
         align: "left"
     },
     {
+        key: 'calendar',
         title: "체계적인 일정 관리",
         description: "복잡한 일상도 깔끔하게 정리하세요. 중요한 약속을 놓치지 않도록 도와줍니다.",
         image: "/schedule_mockup.png",
@@ -40,6 +44,7 @@ const features = [
         align: "right"
     },
     {
+        key: 'ai',
         title: "AI 데일리 어시스턴트",
         description: "당신의 하루를 이해하는 똑똑한 AI 친구. 대화를 나누며 감정을 정리하고 조언을 얻으세요.",
         image: "/ai_mockup.png",
@@ -51,7 +56,18 @@ const features = [
     }
 ];
 
-const FeatureShowcase: React.FC = () => {
+interface FeatureShowcaseProps {
+    onDrive: () => void;
+    onCalendar: () => void;
+    onBookmark: () => void;
+}
+
+const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({ onDrive, onCalendar, onBookmark }) => {
+    const handlers: Record<string, () => void> = {
+        drive: onDrive,
+        calendar: onCalendar,
+        bookmark: onBookmark
+    };
     return (
         <div className="py-20 space-y-32">
             <div className="text-center mb-16">
@@ -94,7 +110,11 @@ const FeatureShowcase: React.FC = () => {
                             </p>
                         </div>
 
-                        <button className={`group flex items-center gap-2 mx-auto md:mx-0 font-bold ${feature.color} hover:opacity-80 transition-opacity`}>
+                        <button
+                            onClick={handlers[feature.key]}
+                            disabled={!handlers[feature.key]}
+                            className={`group flex items-center gap-2 mx-auto md:mx-0 font-bold ${feature.color} transition-opacity ${handlers[feature.key] ? 'hover:opacity-80' : 'opacity-40 cursor-default'}`}
+                        >
                             자세히 보기 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                         </button>
                     </div>

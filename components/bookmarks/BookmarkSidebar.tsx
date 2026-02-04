@@ -1,8 +1,8 @@
 import React from 'react';
 import { Folder, Plus, Star, Inbox } from 'lucide-react';
-import ResponsiveSidebar from './ResponsiveSidebar';
-import SidebarItem from './SidebarItem';
-import SidebarSection from './SidebarSection';
+import ResponsiveSidebar from '../sidebars/ResponsiveSidebar';
+import SidebarItem from '../sidebars/SidebarItem';
+import SidebarSection from '../sidebars/SidebarSection';
 
 interface FolderItem {
     id: string;
