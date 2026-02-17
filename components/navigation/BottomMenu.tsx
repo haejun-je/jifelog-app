@@ -8,7 +8,7 @@ const BottomMenu: React.FC = () => {
     const navigate = useNavigate();
 
     const menuItems = [
-        { label: '피드', icon: Layout, path: '/' },
+        { label: '피드', icon: Layout, path: '/feed' },
         { label: '드라이브', icon: HardDrive, path: '/drive' },
         { label: 'AI 비서', icon: Bot, path: '/ai' },
         { label: '일정', icon: Calendar, path: '/calendar' },

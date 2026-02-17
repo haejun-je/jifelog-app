@@ -15,6 +15,7 @@ import BookmarkPage from './components/pages/BookmarkPage';
 import LoginPage from './components/pages/LoginPage';
 import NodesPage from './components/pages/NodesPage';
 import CalendarPage from './components/pages/CalendarPage';
+import FeedPage from './components/pages/FeedPage';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -95,6 +96,11 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  const navigateToFeed = () => {
+    navigate('/feed');
+    window.scrollTo(0, 0);
+  };
+
   return (
 
     <div className="min-h-screen transition-colors duration-300">
@@ -105,6 +111,7 @@ const App: React.FC = () => {
         <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/calendar" element={<MainLayout><CalendarPage onBack={navigateToDrive} /></MainLayout>} />
+        <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
         <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
 
         <Route path="/signup" element={<SignupPage />} />
