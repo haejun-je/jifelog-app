@@ -1,127 +1,215 @@
 import React from 'react';
-import { ArrowRight, Bot, Calendar, HardDrive, Layout, Bookmark } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Bot, Bookmark, Calendar, HardDrive, Layout, Sparkles } from 'lucide-react';
 
-const features = [
-    {
-        key: 'feed',
-        title: "아름답게 기록하는 당신의 일상",
-        description: "소중한 순간들을 사진과 글로 남기세요. 당신만의 감성이 담긴 피드가 완성됩니다.",
-        image: "/feed_mockup.png",
-        icon: <Layout className="w-6 h-6" />,
-        color: "text-teal-400",
-        bgColor: "bg-teal-500/10",
-        align: "left"
-    },
-    {
-        key: 'bookmark',
-        title: "스마트한 웹 콘텐츠 관리",
-        description: "인상 깊은 웹페이지를 PDF로 영구 소장하세요. URL만 입력하면 깔끔하게 스크랩됩니다.",
-        image: "/bookmark_mockup.png",
-        icon: <Bookmark className="w-6 h-6" />,
-        color: "text-amber-400",
-        bgColor: "bg-amber-500/10",
-        align: "right",
-        isNew: true
-    },
-    {
-        key: 'drive',
-        title: "안전하고 스마트한 클라우드",
-        description: "모든 사진과 파일을 안전하게 보관하세요. 언제 어디서나 쉽게 접근할 수 있습니다.",
-        image: "/drive_mockup.png",
-        icon: <HardDrive className="w-6 h-6" />,
-        color: "text-blue-400",
-        bgColor: "bg-blue-500/10",
-        align: "left"
-    },
-    {
-        key: 'calendar',
-        title: "체계적인 일정 관리",
-        description: "복잡한 일상도 깔끔하게 정리하세요. 중요한 약속을 놓치지 않도록 도와줍니다.",
-        image: "/schedule_mockup.png",
-        icon: <Calendar className="w-6 h-6" />,
-        color: "text-purple-400",
-        bgColor: "bg-purple-500/10",
-        align: "right"
-    },
-    {
-        key: 'ai',
-        title: "AI 데일리 어시스턴트",
-        description: "당신의 하루를 이해하는 똑똑한 AI 친구. 대화를 나누며 감정을 정리하고 조언을 얻으세요.",
-        image: "/ai_mockup.png",
-        icon: <Bot className="w-6 h-6" />,
-        color: "text-rose-400",
-        bgColor: "bg-rose-500/10",
-        align: "left",
-        isNew: true
-    }
+const flowSteps = [
+  {
+    label: 'Capture',
+    title: '보이는 순간을 바로 남기고',
+    description: '사진, 글, 링크를 놓치지 않게 가볍게 쌓습니다.',
+  },
+  {
+    label: 'Organize',
+    title: '흩어진 정보를 흐름으로 묶고',
+    description: '저장한 정보와 일정, 파일이 서로 이어지도록 정리합니다.',
+  },
+  {
+    label: 'Reflect',
+    title: '하루의 맥락을 다시 읽습니다',
+    description: 'AI가 핵심 장면을 요약하고 다음 행동을 제안합니다.',
+  },
+];
+
+const scenarioGroups = [
+  {
+    title: '흩어진 하루를 한 곳에 모읍니다',
+    description: '피드와 드라이브가 연결되어 기록과 보관이 분리되지 않습니다.',
+    image: '/feed_mockup.png',
+    accent: 'from-teal-300/30 via-cyan-300/8 to-transparent',
+    points: [
+      {
+        title: '기록은 더 감각적으로',
+        description: '사진과 글이 섞여도 무드가 흐트러지지 않는 개인 피드',
+        icon: <Layout className="h-4 w-4" />,
+      },
+      {
+        title: '파일은 더 안정적으로',
+        description: '필요한 파일과 이미지가 같은 흐름 안에서 다시 쓰이는 저장 구조',
+        icon: <HardDrive className="h-4 w-4" />,
+      },
+    ],
+    cta: '피드 보기',
+    key: 'feed',
+  },
+  {
+    title: '저장한 정보가 다시 쓰이게 만듭니다',
+    description: '북마크는 쌓이기만 하는 목록이 아니라, 나중에 다시 꺼내는 개인 지식 베이스가 됩니다.',
+    image: '/bookmark_mockup.png',
+    accent: 'from-amber-300/28 via-orange-300/10 to-transparent',
+    points: [
+      {
+        title: '링크를 깔끔하게 보관',
+        description: 'URL 하나로 콘텐츠를 정리해 두고 맥락까지 유지',
+        icon: <Bookmark className="h-4 w-4" />,
+      },
+      {
+        title: '검색보다 회수에 초점',
+        description: '다시 볼 자료가 남는 구조로 읽는 시간을 자산화',
+        icon: <Sparkles className="h-4 w-4" />,
+      },
+    ],
+    cta: '북마크 보기',
+    key: 'bookmark',
+  },
+  {
+    title: '일정과 기록이 끊기지 않게 이어집니다',
+    description: '캘린더는 약속만 적는 곳이 아니라 그날의 기억과 파일을 함께 묶는 기준점이 됩니다.',
+    image: '/schedule_mockup.png',
+    accent: 'from-violet-300/30 via-fuchsia-300/10 to-transparent',
+    points: [
+      {
+        title: '하루를 시간으로 정리',
+        description: '계획과 실행이 따로 놀지 않도록 일정 축을 유지',
+        icon: <Calendar className="h-4 w-4" />,
+      },
+      {
+        title: '중요한 장면을 다시 연결',
+        description: '그날의 기록과 저장한 자료를 일정 맥락 안에서 재탐색',
+        icon: <Layout className="h-4 w-4" />,
+      },
+    ],
+    cta: '캘린더 보기',
+    key: 'calendar',
+  },
+  {
+    title: 'AI가 하루를 요약하고 다음 행동을 돕습니다',
+    description: '정리된 데이터 위에서 작동하는 AI가 회고와 추천까지 연결해 줍니다.',
+    image: '/ai_mockup.png',
+    accent: 'from-rose-300/30 via-pink-300/10 to-transparent',
+    points: [
+      {
+        title: '단순 대화가 아닌 회고',
+        description: '오늘의 기록과 일정, 저장한 자료를 바탕으로 핵심만 정리',
+        icon: <Bot className="h-4 w-4" />,
+      },
+      {
+        title: '내일의 행동까지 연결',
+        description: '다음에 할 일과 돌아봐야 할 포인트를 자연스럽게 제안',
+        icon: <ArrowRight className="h-4 w-4" />,
+      },
+    ],
+    cta: 'AI 경험하기',
+    key: 'ai',
+  },
 ];
 
 interface FeatureShowcaseProps {
-    onDrive: () => void;
-    onCalendar: () => void;
-    onBookmark: () => void;
+  onFeed: () => void;
+  onCalendar: () => void;
+  onBookmark: () => void;
+  onSignup: () => void;
 }
 
-const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({ onDrive, onCalendar, onBookmark }) => {
-    const handlers: Record<string, () => void> = {
-        drive: onDrive,
-        calendar: onCalendar,
-        bookmark: onBookmark
-    };
-    return (
-        <div className="py-20 space-y-32">
-            <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
-                    더 스마트한 라이프스타일
-                </h2>
-                <p className="text-slate-500 dark:text-gray-400 max-w-lg mx-auto leading-relaxed">
-                    JifeLog만의 특별한 기능들로 당신의 삶을 더 풍요롭게 만들어보세요
-                </p>
-            </div>
+const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({
+  onFeed,
+  onCalendar,
+  onBookmark,
+  onSignup,
+}) => {
+  const handlers: Record<string, () => void> = {
+    feed: onFeed,
+    bookmark: onBookmark,
+    calendar: onCalendar,
+    ai: onSignup,
+  };
 
-            {features.map((feature, index) => (
-                <div key={index} className={`flex flex-col md:flex-row items-center gap-12 md:gap-20 ${feature.align === 'right' ? 'md:flex-row-reverse' : ''}`}>
-
-                    {/* Image Side */}
-                    <div className="flex-1 w-full relative group">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${feature.align === 'left' ? 'from-teal-500/20 to-blue-500/20' : 'from-purple-500/20 to-rose-500/20'} blur-3xl rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-500`} />
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-200 dark:border-slate-800/50 transform transition-transform duration-500 hover:scale-[1.02] hover:-rotate-1">
-                            <img src={feature.image} alt={feature.title} className="w-full h-auto object-cover" />
-                        </div>
-                    </div>
-
-                    {/* Text Side */}
-                    <div className="flex-1 space-y-6 text-center md:text-left">
-                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl ${feature.bgColor} ${feature.color} mb-2`}>
-                            {feature.icon}
-                        </div>
-
-                        <div className="space-y-3">
-                            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white flex items-center justify-center md:justify-start gap-3">
-                                {feature.title}
-                                {feature.isNew && (
-                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-rose-500 text-white rounded-full uppercase tracking-wider animate-pulse">
-                                        NEW
-                                    </span>
-                                )}
-                            </h3>
-                            <p className="text-slate-600 dark:text-gray-400 leading-relaxed text-lg">
-                                {feature.description}
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={handlers[feature.key]}
-                            disabled={!handlers[feature.key]}
-                            className={`group flex items-center gap-2 mx-auto md:mx-0 font-bold ${feature.color} transition-opacity ${handlers[feature.key] ? 'hover:opacity-80' : 'opacity-40 cursor-default'}`}
-                        >
-                            자세히 보기 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                        </button>
-                    </div>
-                </div>
-            ))}
+  return (
+    <div className="space-y-28 py-24 md:space-y-36 md:py-32">
+      <section className="space-y-8">
+        <div className="max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-teal-300">Daily flow</p>
+          <h2 className="mt-4 max-w-[14ch] text-4xl font-black tracking-[-0.05em] text-white md:text-6xl">
+            기록하고, 모으고, 다시 읽는 흐름
+          </h2>
         </div>
-    );
+
+        <div className="grid gap-6 border-t border-white/10 pt-8 md:grid-cols-3">
+          {flowSteps.map((step, index) => (
+            <motion.div
+              key={step.label}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.55, delay: index * 0.08 }}
+              className="border-l border-white/10 pl-4"
+            >
+              <p className="text-xs uppercase tracking-[0.26em] text-slate-500">{step.label}</p>
+              <h3 className="mt-4 text-2xl font-bold tracking-[-0.04em] text-white">{step.title}</h3>
+              <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400 md:text-base">{step.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-24">
+        {scenarioGroups.map((group, index) => {
+          const handler = handlers[group.key];
+
+          return (
+            <motion.article
+              key={group.title}
+              initial={{ opacity: 0, y: 36 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className={`grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16 ${
+                index % 2 === 1 ? 'lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]' : ''
+              }`}
+            >
+              <div className={index % 2 === 1 ? 'lg:order-2' : ''}>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-300">Scenario {index + 1}</p>
+                <h3 className="mt-4 max-w-[12ch] text-3xl font-black tracking-[-0.05em] text-white md:text-5xl">
+                  {group.title}
+                </h3>
+                <p className="mt-5 max-w-xl text-base leading-7 text-slate-300 md:text-lg">{group.description}</p>
+
+                <div className="mt-8 space-y-5 border-t border-white/10 pt-6">
+                  {group.points.map((point) => (
+                    <div key={point.title} className="flex gap-4">
+                      <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-teal-200">
+                        {point.icon}
+                      </div>
+                      <div>
+                        <h4 className="text-base font-bold text-white">{point.title}</h4>
+                        <p className="mt-1 text-sm leading-6 text-slate-400 md:text-base">{point.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handler}
+                  className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-teal-200 transition-colors hover:text-white"
+                >
+                  {group.cta}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className={index % 2 === 1 ? 'lg:order-1' : ''}>
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-3 shadow-[0_24px_80px_rgba(2,6,23,0.4)]">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${group.accent}`} />
+                  <div className="relative overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#0b1120]">
+                    <img src={group.image} alt={group.title} className="w-full object-cover" />
+                  </div>
+                </div>
+              </div>
+            </motion.article>
+          );
+        })}
+      </section>
+    </div>
+  );
 };
 
 export default FeatureShowcase;
