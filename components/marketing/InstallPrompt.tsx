@@ -43,7 +43,7 @@ const InstallPrompt: React.FC = () => {
   return (
     <button
       onClick={handleInstall}
-      className="inline-flex items-center gap-2 bg-teal-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg shadow-teal-500/20 hover:bg-teal-600 transition-colors"
+      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.08] hover:text-white"
     >
       <Download size={16} />
       앱 다운로드
