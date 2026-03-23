@@ -80,10 +80,10 @@ const SignupPage: React.FC = () => {
         <div className="flex flex-1 items-center py-10 md:py-14">
           <div className="grid w-full gap-12 lg:grid-cols-[0.9fr_minmax(0,560px)] lg:gap-20">
             <div className="max-w-xl self-start lg:self-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-teal-200 backdrop-blur">
+        {/*      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-teal-200 backdrop-blur">
                 <Sparkles size={14} />
                 JifeLog Signup
-              </div>
+              </div>*/}
 
               <h1 className="mt-6 max-w-[11ch] text-4xl font-black leading-[0.94] tracking-[-0.06em] text-white md:text-6xl">
                 당신의 하루를 연결할 준비를 시작하세요
@@ -310,7 +310,7 @@ const SignupPage: React.FC = () => {
                   )}
                 </AnimatePresence>
 
-                <div className="border-t border-white/8 pt-5 text-left">
+                <div className="border-white/8 pt-5 text-left">
                   <p className="text-xs text-slate-500">
                     이미 계정이 있으신가요?{' '}
                     <Link to="/login" className="font-bold text-teal-300 transition-colors hover:text-teal-200">

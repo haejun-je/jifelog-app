@@ -43,10 +43,10 @@ const LoginPage: React.FC = () => {
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               className="max-w-xl self-start lg:self-center"
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-teal-200 backdrop-blur">
+          {/*    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-teal-200 backdrop-blur">
                 <Sparkles size={14} />
                 JifeLog Login
-              </div>
+              </div>*/}
 
               <h1 className="mt-6 max-w-[10ch] text-4xl font-black leading-[0.94] tracking-[-0.06em] text-white md:text-6xl">
                 다시 돌아온 하루를 바로 이어가세요
