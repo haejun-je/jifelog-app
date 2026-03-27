@@ -5,6 +5,7 @@ WORKDIR /app
 ARG GH_PACKAGES_TOKEN
 ARG GH_ID
 ARG GEMINI_API_KEY=""
+ARG VITE_MODE=production
 
 COPY package.json package-lock.json ./
 
@@ -18,7 +19,7 @@ COPY . .
 
 ENV GEMINI_API_KEY=$GEMINI_API_KEY
 
-RUN npm run build
+RUN npm run build -- --mode $VITE_MODE
 
 FROM nginx:1.27-alpine
 
