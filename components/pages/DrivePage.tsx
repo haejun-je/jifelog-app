@@ -3,9 +3,8 @@ import {
   ChevronLeft, Search, Star, Clock, Image, Video, FileText, Music,
   Folder, MoreVertical, Trash2, HardDrive, ChevronRight, Menu, Plus
 } from 'lucide-react';
-import BottomMenu from '../navigation/BottomMenu';
 import SideMenu from '../drive/SideMenu';
-import { motion, AnimatePresence } from 'framer-motion';
+import ScrollAwareFab from '../common/ScrollAwareFab';
 
 import UniversalHeader from '../layout/UniversalHeader';
 
@@ -21,6 +20,9 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuHistoryRef = useRef(false);
+  const storageUsed = 2.8;
+  const storageTotal = 15;
+  const storageRatio = (storageUsed / storageTotal) * 100;
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -69,12 +71,12 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
   };
 
   const categories = [
-    { label: '즐겨찾기', icon: <Star size={20} />, color: 'text-amber-400' },
-    { label: '최근', icon: <Clock size={20} />, color: 'text-blue-400' },
-    { label: '사진 폴더', icon: <Image size={20} />, color: 'text-teal-400' },
-    { label: '동영상', icon: <Video size={20} />, color: 'text-purple-400' },
-    { label: '문서', icon: <FileText size={20} />, color: 'text-red-400' },
-    { label: '음악', icon: <Music size={20} />, color: 'text-emerald-400' },
+    { label: '즐겨찾기', icon: <Star size={20} />, color: 'text-amber-400', meta: '자주 여는 항목' },
+    { label: '최근', icon: <Clock size={20} />, color: 'text-blue-400', meta: '마지막 작업 기록' },
+    { label: '사진 폴더', icon: <Image size={20} />, color: 'text-teal-400', meta: '앨범과 촬영본' },
+    { label: '동영상', icon: <Video size={20} />, color: 'text-violet-400', meta: '클립과 아카이브' },
+    { label: '문서', icon: <FileText size={20} />, color: 'text-rose-400', meta: '문서와 메모' },
+    { label: '음악', icon: <Music size={20} />, color: 'text-emerald-400', meta: '오디오 파일' },
   ];
 
   const folders = [
@@ -89,6 +91,12 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
     { name: '아이디어 회의록.docx', size: '45 KB', date: '어제', type: 'doc' },
     { name: '아이디어 회의록.docx', size: '45 KB', date: '어제', type: 'doc' },
   ];
+
+  const getFileIcon = (type: string) => {
+    if (type === 'pdf') return <FileText size={22} className="text-rose-500 dark:text-rose-400" />;
+    if (type === 'image') return <Image size={22} className="text-teal-500 dark:text-teal-400" />;
+    return <FileText size={22} className="text-blue-500 dark:text-blue-400" />;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0f172a] transition-colors">
@@ -105,126 +113,222 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         <SideMenu isOpen={isMenuOpen} onClose={closeMenu} />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto w-full relative md:ml-64 md:pr-64">
-          <div className="max-w-7xl mx-auto pb-24">
+        <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative md:ml-64">
+          <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
 
-            {/* Search Input */}
-            <div className="px-5 mt-4">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="파일, 폴더 검색"
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 pl-12 pr-4 py-3.5 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 shadow-sm transition-all"
-                />
+            <section className={`pt-5 md:pt-6 transition-all duration-500 ease-in-out ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className="overflow-hidden rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.08)] dark:shadow-none">
+                <div className="relative px-5 py-5 md:px-7 md:py-7">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.16),transparent_32%),radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_28%)]" />
+                  <div className="relative space-y-4">
+                    <div className="space-y-3">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-teal-500/80 dark:text-teal-300/80">
+                        My Drive
+                      </p>
+                    </div>
+
+                    <div className="grid gap-3">
+                        <div className="relative">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="파일, 폴더 검색"
+                            className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/5 pl-12 pr-4 py-3.5 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/40 transition-all"
+                          />
+                        </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
 
             {/* Categories Grid */}
-            <div className={`p-5 grid grid-cols-3 gap-4 transition-all duration-500 ease-in-out ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              {categories.map((cat, i) => (
-                <button
-                  key={i}
-                  className="dark-card p-4 rounded-2xl flex flex-col items-center justify-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
-                >
-                  <div className={cat.color}>{React.cloneElement(cat.icon, { size: 26 })}</div>
-                  <span className="text-xs font-bold text-slate-600 dark:text-gray-300">{cat.label}</span>
-                </button>
-              ))}
-            </div>
+            <section className={`mt-6 transition-all duration-500 ease-in-out delay-75 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {categories.map((cat, i) => (
+                  <button
+                    key={i}
+                    className="group rounded-[20px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 px-3 py-4 text-left hover:border-teal-400/50 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors active:scale-[0.99]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className={`w-11 h-11 rounded-2xl bg-slate-50 dark:bg-slate-800/70 flex items-center justify-center ${cat.color}`}>
+                        {React.cloneElement(cat.icon, { size: 22 })}
+                      </div>
+                      <ChevronRight size={16} className="mt-1 text-slate-300 dark:text-slate-600 group-hover:text-teal-500 transition-colors" />
+                    </div>
+                    <div className="mt-4">
+                      <div className="text-sm font-black tracking-tight text-slate-900 dark:text-white break-keep">
+                        {cat.label}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
 
             {/* Content Lists */}
-            <div className="flex-1 px-5 space-y-8 mt-4">
+            <div className="flex-1 space-y-8 mt-8">
+              <section className={`transition-all duration-500 ease-in-out delay-100 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
+                  <div className="grid gap-6 px-5 py-5 md:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
               {/* Recent Files Grid */}
-              <div className={`transition-all duration-500 ease-in-out delay-100 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-black text-slate-400 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    <Clock size={14} /> 최근 파일
-                  </h3>
-                  <button onClick={onSeeAllRecent} className="p-1 text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white transition-colors">
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  {recentFiles.slice(0, 4).map((file, i) => (
-                    <div key={i} className="dark-card rounded-2xl p-3 flex flex-col items-center justify-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group aspect-square">
-                      <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 dark:text-gray-400">
-                        {file.type === 'pdf' ? <FileText size={24} className="text-red-500 dark:text-red-400" /> :
-                          file.type === 'image' ? <Image size={24} className="text-teal-500 dark:text-teal-400" /> :
-                            <FileText size={24} className="text-blue-500 dark:text-blue-400" />}
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                            <Clock size={14} /> Recent Files
+                          </p>
+                          <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                            최근 파일
+                          </h3>
+                        </div>
+                        <button onClick={onSeeAllRecent} className="h-10 px-3 rounded-xl text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                          <ChevronRight size={20} />
+                        </button>
                       </div>
-                      <div className="text-center">
-                        <span className="text-xs font-bold text-slate-600 dark:text-gray-300 w-full leading-tight line-clamp-2">
-                          {file.name}
-                        </span>
-                        <span className="text-[10px] text-slate-500 dark:text-gray-500 block leading-tight mt-1">
-                          {file.size}
-                        </span>
+                      <div className="space-y-3">
+                        {recentFiles.slice(0, 4).map((file, i) => (
+                          <button
+                            key={i}
+                            className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/40 px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center border border-slate-200/80 dark:border-white/5">
+                                {getFileIcon(file.type)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
+                                  {file.name}
+                                </div>
+                                <div className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
+                                  {file.size} • {file.date}
+                                </div>
+                              </div>
+                              <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-teal-500 transition-colors" />
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  ))}
+
+                    <div className="rounded-[24px] border border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-slate-950/40 p-4 md:p-5">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                        Shortcuts
+                      </p>
+                      <h3 className="mt-2 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                        자주 여는 폴더
+                      </h3>
+                      <div className="mt-5 space-y-3">
+                        {folders.slice(0, 2).map((folder, i) => (
+                          <div key={i} className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-white/5 px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-11 h-11 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                                <Folder size={22} />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-sm font-black text-slate-900 dark:text-white truncate">{folder.name}</div>
+                                <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                  항목 {folder.items}개 • 수정 {folder.date}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </section>
 
               {/* Folders List */}
-              <div className={`transition-all duration-500 ease-in-out delay-200 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-black text-slate-400 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    <Folder size={14} /> 내 드라이브
-                  </h3>
-                  <button onClick={onSeeAllNodes} className="p-1 text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white transition-colors">
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {folders.map((folder, i) => (
-                    <div key={i} className="dark-card rounded-2xl p-4 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-teal-500/10 rounded-xl flex items-center justify-center text-teal-600 dark:text-teal-500">
-                          <Folder size={26} />
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-slate-800 dark:text-white mb-1 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                            {folder.name}
+              <section className={`transition-all duration-500 ease-in-out delay-200 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
+                  <div className="flex justify-between items-center border-b border-slate-200/80 dark:border-white/5 px-5 py-4 md:px-6">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                        <Folder size={14} /> My Drive
+                      </p>
+                      <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                        내 드라이브
+                      </h3>
+                    </div>
+                    <button onClick={onSeeAllNodes} className="h-10 px-3 rounded-xl text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5">
+                    {folders.map((folder, i) => (
+                      <div key={i} className="px-5 py-4 md:px-6 group hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className="w-12 h-12 bg-teal-500/10 rounded-2xl flex items-center justify-center text-teal-600 dark:text-teal-500">
+                              <Folder size={24} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[15px] font-black tracking-tight text-slate-800 dark:text-white mb-1 truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                {folder.name}
+                              </div>
+                              <div className="text-[12px] text-slate-500 dark:text-gray-400">
+                                항목 {folder.items}개 • 마지막 수정 {folder.date}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-[10px] text-slate-500 dark:text-gray-500">
-                            항목 {folder.items}개 • {folder.date}
-                          </div>
+                          <button className="p-2 text-slate-400 dark:text-gray-600 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                            <MoreVertical size={18} />
+                          </button>
                         </div>
                       </div>
-                      <button className="p-2 text-slate-400 dark:text-gray-600 hover:text-slate-900 dark:hover:text-white">
-                        <MoreVertical size={18} />
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className={`transition-all duration-500 ease-in-out delay-300 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
+                  <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_280px]">
+                    <div className="px-5 py-5 md:px-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                            Storage
+                          </p>
+                          <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                            {storageUsed} GB / {storageTotal} GB
+                          </h3>
+                        </div>
+                        <div className="w-11 h-11 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                          <HardDrive size={22} />
+                        </div>
+                      </div>
+
+                      <div className="mt-5">
+                        <div className="flex items-center justify-between text-[11px] font-bold tracking-[0.16em] uppercase text-slate-400 dark:text-slate-500">
+                          <span>Used</span>
+                          <span>{storageRatio.toFixed(1)}%</span>
+                        </div>
+                        <div className="mt-3 h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[linear-gradient(90deg,#14b8a6_0%,#2dd4bf_50%,#60a5fa_100%)] shadow-[0_0_24px_rgba(45,212,191,0.35)]"
+                            style={{ width: `${storageRatio}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-white/5 px-5 py-5 md:px-6 flex items-center justify-between gap-4 bg-slate-50/70 dark:bg-slate-950/30">
+                      <div>
+                        <div className="text-sm font-black text-slate-900 dark:text-white">휴지통</div>
+                        <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">삭제 항목 보기</div>
+                      </div>
+                      <button className="h-10 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-black hover:opacity-90 transition-opacity">
+                        열기
                       </button>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Storage & Trash Section */}
-            <div className={`p-5 mt-4 transition-all duration-500 ease-in-out delay-300 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <div className="dark-card p-5 rounded-3xl space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2 text-slate-800 dark:text-white">
-                    <HardDrive size={16} className="text-teal-600 dark:text-teal-400" />
-                    <span className="text-sm font-bold">전체 저장 공간</span>
                   </div>
-                  <span className="text-sm font-bold text-teal-600 dark:text-teal-400">2.8 GB / 15 GB</span>
                 </div>
-                <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full teal-gradient w-[60.6%] rounded-full shadow-[0_0_10px_rgba(45,212,191,0.5)]"></div>
-                </div>
-                <div className="pt-2">
-                  <p className="text-[10px] text-slate-500 dark:text-gray-500 font-medium">12.2 GB 사용 가능</p>
-                </div>
-              </div>
-              {/* Trash Button */}
-              <button className="w-full flex items-center justify-center gap-2 mt-4 py-3 bg-gray-500 rounded-xl text-white font-bold hover:bg-gray-600 transition-colors active:scale-95">
-                <Trash2 size={20} />
-                휴지통
-              </button>
+              </section>
             </div>
           </div>
         </main>
@@ -238,18 +342,15 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
 
 
 
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+      <ScrollAwareFab
         onClick={() => {
           handleFileSelect()
         }}
-        className="fixed right-6 bottom-24 z-30 w-14 h-14 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-teal-600 transition-colors"
+        ariaLabel="파일 추가"
+        className="shadow-teal-500/30"
       >
         <Plus size={28} />
-      </motion.button>
+      </ScrollAwareFab>
 
 
     </div>

@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jifelog-app
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: jifelog-app
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '128Mi'
+            limits:
+              cpu: '300m'
+              memory: '256Mi'

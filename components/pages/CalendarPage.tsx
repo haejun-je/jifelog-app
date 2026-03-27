@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import UniversalHeader from '../layout/UniversalHeader';
 import CalendarSidebar, { CalendarCategory } from '../calendar/CalendarSidebar';
+import ScrollAwareFab from '../common/ScrollAwareFab';
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, AlignLeft, Plus, X, Check, Trash, Calendar as CalendarIcon } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -138,7 +139,7 @@ const CustomCalendarView: React.FC<{
             {/* Week Header */}
             <div className="grid grid-cols-7 border-b border-slate-100 dark:border-white/5">
                 {['일', '월', '화', '수', '목', '금', '토'].map((d, i) => (
-                    <div key={d} className={`text-[10px] text-center font-black py-2 uppercase tracking-tight ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-slate-400'}`}>
+                    <div key={d} className={`text-[15px] text-center font-black py-2 uppercase tracking-tight ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-slate-400'}`}>
                         {d}
                     </div>
                 ))}
@@ -171,7 +172,7 @@ const CustomCalendarView: React.FC<{
                             onClick={() => onDateClick(cellDate)}
                             className={`border-r border-b border-slate-50 dark:border-white/5 pt-0.5 pb-1 min-h-0 flex flex-col transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20 cursor-pointer ${!d.isCurrentMonth ? 'opacity-30' : ''}`}
                         >
-                            <span className={`text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full ml-auto mb-0.5 mr-1 ${isToday ? 'bg-teal-500 text-white' : 'text-slate-400'}`}>
+                            <span className={`text-[13px] font-black w-5 h-5 flex items-center justify-center rounded-full ml-auto mb-0.5 mr-1 ${isToday ? 'bg-teal-500 text-white' : 'text-slate-400'}`}>
                                 {d.day}
                             </span>
                             <div className="flex flex-col gap-0.5">
@@ -468,7 +469,13 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 />
 
                 {/* Main Content */}
-                <main ref={mainContentRef} className="flex-1 overflow-y-auto w-full relative md:ml-64 custom-scrollbar">
+                <main
+                    ref={(node) => {
+                        mainContentRef.current = node;
+                    }}
+                    data-fab-scroll-container
+                    className="flex-1 overflow-y-auto w-full relative md:ml-64 custom-scrollbar"
+                >
                     <motion.div
                         className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 overflow-hidden flex-shrink-0 flex flex-col"
                         animate={{ height: calendarHeight }}
@@ -530,7 +537,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <div className="absolute right-full top-0 bottom-0 w-full px-2 opacity-20">
                                     <CustomCalendarView date={prevMonthDate} schedules={allVisibleSchedules} calendars={calendars} onDateClick={() => { }} onEventClick={() => { }} />
                                 </div>
-                                <div className="w-full h-full px-2 flex-shrink-0">
+                                <div className="w-full h-full flex-shrink-0">
                                     <CustomCalendarView date={currentDate} schedules={allVisibleSchedules} calendars={calendars} onDateClick={handleDateClick} onEventClick={handleEventClick} />
                                 </div>
                                 <div className="absolute left-full top-0 bottom-0 w-full px-2 opacity-20">
@@ -642,20 +649,16 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </AnimatePresence>
 
             {/* FAB for adding schedule */}
-            <motion.button
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+            <ScrollAwareFab
                 onClick={() => {
                     setSelectedDate(new Date());
                     setEditingSchedule(null);
                     setIsScheduleModalOpen(true);
                 }}
-                className="fixed right-6 bottom-24 z-30 w-14 h-14 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-teal-600 transition-colors"
+                ariaLabel="일정 추가"
             >
                 <Plus size={28} />
-            </motion.button>
+            </ScrollAwareFab>
 
 
 

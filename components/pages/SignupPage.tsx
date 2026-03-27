@@ -1,235 +1,359 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Lock, User, Check, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, ArrowLeft, Check, Lock, Mail, User } from 'lucide-react';
+import { useSignupForm, formatTime } from '../../hooks/useSignupForm';
+
+const revealTransition = {
+  duration: 0.38,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
 
 const SignupPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [isEmailValid, setIsEmailValid] = useState(true);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isCodeVerified, setIsCodeVerified] = useState(false);
-
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  React.useEffect(() => {
-    if (email) {
-      setIsEmailValid(validateEmail(email));
-    } else {
-      setIsEmailValid(true);
-    }
-  }, [email]);
-
-  React.useEffect(() => {
-    if (password && confirmPassword && password !== confirmPassword) {
-      setPasswordError(true);
-    } else {
-      setPasswordError(false);
-    }
-  }, [password, confirmPassword]);
-
-  const handleSignup = () => {
-    if (!name || !email || !password || !confirmPassword || passwordError || !agreedToTerms || !isEmailValid) {
-      return;
-    }
-    // Perform signup logic here
-    navigate('/');
-  };
+  const {
+    name, setName,
+    email, setEmail,
+    isEmailValid,
+    verificationCode, setVerificationCode,
+    password, setPassword,
+    confirmPassword, setConfirmPassword,
+    agreedToTerms, setAgreedToTerms,
+    isCodeSent,
+    isCodeVerified,
+    timeLeft,
+    isTimedOut,
+    passwordMismatch,
+    passwordValidError,
+    isRequestingCode,
+    isVerifyingCode,
+    isSigningUp,
+    codeError,
+    signupError,
+    canRequestCode,
+    canShowEmail,
+    canShowVerification,
+    canShowPassword,
+    canShowConfirmPassword,
+    canShowTerms,
+    isFormComplete,
+    handleRequestCode,
+    handleVerifyCode,
+    handleSignup,
+  } = useSignupForm();
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col relative overflow-hidden text-slate-200">
-      {/* Background Effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-teal-500/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px]" />
+    <div className="relative min-h-screen overflow-hidden bg-[#061019] text-slate-100">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(56,189,248,0.14),transparent_24%),linear-gradient(180deg,#071019_0%,#0b1320_52%,#111827_100%)]" />
+      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:72px_72px]" />
+      <div className="absolute left-[-12%] top-[8%] h-72 w-72 rounded-full bg-teal-400/14 blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-8%] h-80 w-80 rounded-full bg-cyan-400/12 blur-[140px]" />
 
-      <div className="max-w-md w-full mx-auto p-6 relative z-10 flex-1 flex flex-col justify-center">
-        {/* Navigation */}
-        <div className="absolute top-6 left-6">
-          <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
-            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-              <ArrowLeft className="w-4 h-4" />
+      <div className="relative mx-auto flex min-h-screen max-w-screen-xl flex-col px-5 pb-10 pt-6 md:px-8 lg:px-10">
+        <div className="flex items-center justify-between">
+          <Link
+            to="/"
+            className="group inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition-colors hover:text-white"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] transition-colors group-hover:bg-white/[0.08]">
+              <ArrowLeft className="h-4 w-4" />
             </div>
-            <span className="text-sm font-medium">돌아가기</span>
+            돌아가기
           </Link>
+          <p className="hidden text-xs uppercase tracking-[0.28em] text-slate-500 md:block">JifeLog</p>
         </div>
 
-        {/* Header */}
-        <div className="text-center mb-16 mt-16">
-          <h1 className="text-3xl font-black text-white mb-2">회원가입</h1>
-          <p className="text-slate-400 text-sm">JifeLog와 함께 새로운 여정을 시작하세요</p>
-        </div>
-
-        {/* Form Card */}
-        <div className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all duration-700 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="space-y-5">
-
-            {/* Name Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 ml-1">이름</label>
-              <div className="relative group">
-                <input
-                  type="text"
-                  placeholder="당신의 이름"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10 transition-all"
-                />
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal-500 transition-colors" size={18} />
-              </div>
+        <div className="flex flex-1 items-center py-10 md:py-14">
+          <div className="grid w-full gap-12 lg:grid-cols-[0.9fr_minmax(0,560px)] lg:gap-20">
+            <div className="max-w-xl self-start lg:self-center">
+              <h1 className="mt-6 max-w-[11ch] text-4xl font-black leading-[0.94] tracking-[-0.06em] text-white md:text-6xl">
+                당신의 하루를 연결할 준비를 시작하세요
+              </h1>
             </div>
 
-            {/* Email Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 ml-1">이메일</label>
-              <div className="flex gap-2">
-                <div className="relative flex-1 group">
-                  <input
-                    type="email"
-                    placeholder="이메일 주소"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isCodeSent}
-                    className={`w-full pl-11 pr-4 py-3.5 bg-slate-800/50 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-4 transition-all disabled:opacity-50 ${!isEmailValid && email
-                      ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/10'
-                      : 'border-slate-700/50 focus:border-teal-500/50 focus:ring-teal-500/10'
-                      }`}
-                  />
-                  <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${!isEmailValid && email ? 'text-red-500' : 'text-slate-500 group-focus-within:text-teal-500'}`} size={18} />
-                </div>
-                {!isCodeVerified && (
-                  <button
-                    onClick={() => setIsCodeSent(true)}
-                    disabled={isCodeSent || !isEmailValid || !email}
-                    className="px-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-50 whitespace-nowrap"
-                  >
-                    인증요청
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Verification Code */}
-            {isCodeSent && !isCodeVerified && (
-              <div className="animate-fade-in-down">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="인증번호"
-                    className="w-full pl-11 pr-4 py-3.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10 transition-all"
-                  />
-                  <button
-                    onClick={() => setIsCodeVerified(true)}
-                    className="px-4 bg-teal-600 hover:bg-teal-500 text-white rounded-xl font-bold text-xs transition-colors whitespace-nowrap"
-                  >
-                    확인
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Password Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 ml-1">비밀번호</label>
-              <div className="relative group">
-                <input
-                  type="password"
-                  placeholder="8자 이상 입력해주세요"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full pl-11 pr-4 py-3.5 bg-slate-800/50 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-4 transition-all ${passwordError ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/10' : 'border-slate-700/50 focus:border-teal-500/50 focus:ring-teal-500/10'
-                    }`}
-                />
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal-500 transition-colors" size={18} />
-              </div>
-            </div>
-
-            {/* Confirm Password */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 ml-1">비밀번호 확인</label>
-              <div className="relative group">
-                <input
-                  type="password"
-                  placeholder="비밀번호를 한번 더 입력해주세요"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full pl-11 pr-4 py-3.5 bg-slate-800/50 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-4 transition-all ${passwordError ? 'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/10' : 'border-slate-700/50 focus:border-teal-500/50 focus:ring-teal-500/10'
-                    }`}
-                />
-                <Check className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${password && !passwordError ? 'text-teal-500' : 'text-slate-500'}`} size={18} />
-              </div>
-              {passwordError && (
-                <p className="flex items-center gap-1 text-red-500 text-xs ml-1">
-                  <AlertCircle size={12} /> 비밀번호가 일치하지 않습니다
-                </p>
-              )}
-            </div>
-
-            {/* Terms */}
-            <label className="flex items-start gap-3 p-1 cursor-pointer group">
-              <div className="relative flex items-center mt-0.5">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <div className="w-5 h-5 border-2 border-slate-600 rounded bg-slate-800/50 peer-checked:bg-teal-500 peer-checked:border-teal-500 transition-all"></div>
-                <Check size={14} className="absolute inset-0 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-              </div>
-              <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed">
-                <span className="text-teal-400 font-bold hover:underline">서비스 이용약관</span> 및 <span className="text-teal-400 font-bold hover:underline">개인정보 처리방침</span>을<br />확인하였으며 이에 동의합니다.
-              </span>
-            </label>
-
-            {/* Submit Button */}
-            <button
-              onClick={handleSignup}
-              disabled={!name || !email || !password || !confirmPassword || passwordError || !agreedToTerms || !isEmailValid || !isCodeVerified}
-              className="w-full py-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white font-bold rounded-xl hover:-translate-y-0.5 active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed text-sm"
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-none lg:max-w-[560px]"
             >
-              회원가입
-            </button>
+              <div className="border-b border-white/8 pb-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-300">Create account</p>
+                <h2 className="mt-3 text-2xl font-black tracking-[-0.05em] text-white md:text-3xl">
+                  항목을 차례대로 입력하세요
+                </h2>
+              </div>
 
-            {/* Divider */}
-            {/*            <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/5"></div>
+              <div className="mt-8 space-y-7">
+                {/* 이름 */}
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={revealTransition}
+                  className="space-y-1.5"
+                >
+                  <label className="ml-1 text-xs font-bold text-slate-400">이름</label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      placeholder="당신의 이름"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full border-0 border-b border-white/12 bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:border-teal-400 focus:outline-none"
+                    />
+                    <User className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-teal-400" />
+                  </div>
+                </motion.div>
+
+                {/* 이메일 */}
+                <AnimatePresence initial={false}>
+                  {canShowEmail && (
+                    <motion.div
+                      key="email-step"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={revealTransition}
+                      className="space-y-1.5 pt-7"
+                    >
+                      <label className="ml-1 text-xs font-bold text-slate-400">이메일</label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1 group">
+                          <input
+                            type="email"
+                            placeholder="이메일 주소"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={isCodeSent}
+                            className={`w-full border-0 border-b bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:outline-none disabled:opacity-50 ${
+                              !isEmailValid && email
+                                ? 'border-red-500/60 focus:border-red-500'
+                                : 'border-white/12 focus:border-teal-400'
+                            }`}
+                          />
+                          <Mail
+                            className={`absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 transition-colors ${
+                              !isEmailValid && email
+                                ? 'text-red-500'
+                                : 'text-slate-500 group-focus-within:text-teal-400'
+                            }`}
+                          />
+                        </div>
+                        {!isCodeVerified && (
+                          <button
+                            onClick={handleRequestCode}
+                            disabled={!canRequestCode || isRequestingCode}
+                            className="whitespace-nowrap self-end rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-white/[0.1] disabled:opacity-50"
+                          >
+                            {isRequestingCode ? '발송 중...' : isCodeSent ? '재발송' : '인증요청'}
+                          </button>
+                        )}
+                      </div>
+                      {isCodeVerified && (
+                        <p className="ml-1 flex items-center gap-1 text-xs text-teal-200">
+                          <Check size={12} />
+                          이메일 인증이 완료되었습니다
+                        </p>
+                      )}
+                      {!isEmailValid && email && (
+                        <p className="ml-1 flex items-center gap-1 text-xs text-red-400">
+                          <AlertCircle size={12} />
+                          올바른 이메일 형식을 입력해주세요
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* 인증코드 */}
+                <AnimatePresence initial={false}>
+                  {canShowVerification && (
+                    <motion.div
+                      key="verification-step"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={revealTransition}
+                      className="space-y-1.5 pt-7"
+                    >
+                      <label className="ml-1 text-xs font-bold text-slate-400">이메일 인증</label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1 group">
+                          <input
+                            type="text"
+                            placeholder="인증번호 16자리"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value.replace(/\s/g, ''))}
+                            maxLength={16}
+                            className="w-full border-0 border-b border-white/12 bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:border-teal-400 focus:outline-none"
+                          />
+                          <Check className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-teal-400" />
+                        </div>
+                        <button
+                          onClick={handleVerifyCode}
+                          disabled={verificationCode.length !== 16 || isTimedOut || isVerifyingCode}
+                          className="whitespace-nowrap self-end rounded-full bg-teal-400 px-4 py-2.5 text-xs font-bold text-slate-950 transition-colors hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isVerifyingCode ? '확인 중...' : '확인'}
+                        </button>
+                      </div>
+                      <div className="ml-1">
+                        {isTimedOut ? (
+                          <p className="flex items-center gap-1 text-xs text-red-400">
+                            <AlertCircle size={12} />
+                            인증 시간이 만료되었습니다. 재발송 해주세요.
+                          </p>
+                        ) : (
+                          <p className={`text-xs ${timeLeft <= 60 ? 'text-red-400' : 'text-slate-400'}`}>
+                            남은 시간: {formatTime(timeLeft)}
+                          </p>
+                        )}
+                      </div>
+                      {codeError && (
+                        <p className="ml-1 flex items-center gap-1 text-xs text-red-400">
+                          <AlertCircle size={12} />
+                          {codeError}
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* 비밀번호 */}
+                <AnimatePresence initial={false}>
+                  {canShowPassword && (
+                    <motion.div
+                      key="password-step"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={revealTransition}
+                      className="space-y-6 pt-7"
+                    >
+                      <div className="space-y-1.5">
+                        <label className="ml-1 text-xs font-bold text-slate-400">비밀번호</label>
+                        <div className="relative group">
+                          <input
+                            type="password"
+                            placeholder="6자 이상, 영문+숫자 조합"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className={`w-full border-0 border-b bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:outline-none ${
+                              passwordValidError
+                                ? 'border-red-500/60 focus:border-red-500'
+                                : 'border-white/12 focus:border-teal-400'
+                            }`}
+                          />
+                          <Lock className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-teal-400" />
+                        </div>
+                        {passwordValidError && (
+                          <p className="ml-1 flex items-center gap-1 text-xs text-red-400">
+                            <AlertCircle size={12} />
+                            {passwordValidError}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 비밀번호 확인 */}
+                      <AnimatePresence initial={false}>
+                        {canShowConfirmPassword && (
+                          <motion.div
+                            key="confirm-step"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={revealTransition}
+                            className="space-y-1.5"
+                          >
+                            <label className="ml-1 text-xs font-bold text-slate-400">비밀번호 확인</label>
+                            <div className="relative group">
+                              <input
+                                type="password"
+                                placeholder="비밀번호를 한번 더 입력해주세요"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className={`w-full border-0 border-b bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:outline-none ${
+                                  passwordMismatch
+                                    ? 'border-red-500/60 focus:border-red-500'
+                                    : 'border-white/12 focus:border-teal-400'
+                                }`}
+                              />
+                              <Check
+                                className={`absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 transition-colors ${
+                                  password && confirmPassword && !passwordMismatch
+                                    ? 'text-teal-400'
+                                    : 'text-slate-500'
+                                }`}
+                              />
+                            </div>
+                            {passwordMismatch && (
+                              <p className="ml-1 flex items-center gap-1 text-xs text-red-400">
+                                <AlertCircle size={12} />
+                                비밀번호가 일치하지 않습니다
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* 약관 동의 및 가입 버튼 */}
+                <AnimatePresence initial={false}>
+                  {canShowTerms && (
+                    <motion.div
+                      key="terms-step"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={revealTransition}
+                      className="space-y-5 pt-7"
+                    >
+                      <label className="group flex cursor-pointer items-start gap-3">
+                        <div className="relative mt-0.5 flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={agreedToTerms}
+                            onChange={(e) => setAgreedToTerms(e.target.checked)}
+                            className="peer sr-only"
+                          />
+                          <div className="h-5 w-5 rounded border-2 border-slate-600 bg-slate-800/50 transition-all peer-checked:border-teal-500 peer-checked:bg-teal-500" />
+                          <Check size={14} className="absolute inset-0 m-auto text-white opacity-0 transition-opacity peer-checked:opacity-100" />
+                        </div>
+                        <span className="text-xs leading-relaxed text-slate-400 transition-colors group-hover:text-slate-300">
+                          <span className="font-bold text-teal-300 hover:underline">서비스 이용약관</span> 및{' '}
+                          <span className="font-bold text-teal-300 hover:underline">개인정보 처리방침</span>을 확인하였으며 이에 동의합니다.
+                        </span>
+                      </label>
+
+                      <button
+                        onClick={handleSignup}
+                        disabled={!isFormComplete || isSigningUp}
+                        className="w-full rounded-full bg-gradient-to-r from-teal-400 to-teal-500 py-4 text-sm font-black text-slate-950 transition-all hover:from-teal-300 hover:to-teal-400 hover:shadow-[0_18px_50px_rgba(45,212,191,0.22)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
+                      >
+                        {isSigningUp ? '처리 중...' : '회원가입'}
+                      </button>
+
+                      {signupError && (
+                        <p className="flex items-center gap-1 text-xs text-red-400">
+                          <AlertCircle size={12} />
+                          {signupError}
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="border-white/8 pt-5 text-left">
+                  <p className="text-xs text-slate-500">
+                    이미 계정이 있으신가요?{' '}
+                    <Link to="/login" className="font-bold text-teal-300 transition-colors hover:text-teal-200">
+                      로그인하기
+                    </Link>
+                  </p>
+                </div>
               </div>
-              <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                <span className="bg-[#0f172a] px-3">Start with Social</span>
-              </div>
-            </div>
-*/}
-            {/* Social Buttons */}
-            {/*             <div className="grid grid-cols-2 gap-3">
-              <button className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl border border-white/5 transition-colors text-xs font-bold">
-                <img src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg" className="w-4 h-4" alt="Google" />
-                Google
-              </button>
-              <button className="flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FADA00] text-[#3C1E1E] py-3 rounded-xl transition-colors text-xs font-bold">
-                <div className="w-4 h-4 flex items-center justify-center">💬</div>
-                Kakao
-              </button>
-            </div>}
-*/}
-            {/* Login Link */}
-            <div className="text-center">
-              <p className="text-xs text-slate-500">
-                이미 계정이 있으신가요? <Link to="/login" className="text-teal-400 font-bold hover:text-teal-300 transition-colors">로그인하기</Link>
-              </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

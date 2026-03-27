@@ -28,17 +28,17 @@ const Hero: React.FC<HeroProps> = ({ onSignup, onExplore }) => {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-10 max-w-xl"
         >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-xs font-semibold tracking-[0.24em] text-teal-200 uppercase backdrop-blur">
+        {/*  <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-xs font-semibold tracking-[0.24em] text-teal-200 uppercase backdrop-blur">
             <Sparkles size={14} />
             JifeLog
-          </div>
+          </div>*/}
 
-          <h1 className="max-w-[10ch] text-[clamp(3.4rem,10vw,7.4rem)] font-black leading-[0.88] tracking-[-0.06em] text-white">
-            하루를
+          <h1 className="max-w-[10ch] text-[clamp(3.4rem,10vw,7.4rem)] font-black leading-[0.93] tracking-[-0.06em] text-white">
+            삶의
             <br />
-            이어주는
+            여정을
             <br />
-            기록 시스템
+            기록하다.
           </h1>
 
           <p className="mt-6 max-w-md text-base leading-7 text-slate-300 md:text-lg">
@@ -88,32 +88,33 @@ const Hero: React.FC<HeroProps> = ({ onSignup, onExplore }) => {
             <div className="absolute left-[12%] top-[16%] h-52 w-52 rounded-full bg-teal-300/18 blur-3xl" />
             <div className="absolute right-[8%] top-[6%] h-40 w-40 rounded-full bg-cyan-300/14 blur-3xl" />
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/6 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.42)] backdrop-blur-sm">
-              <div className="rounded-[1.6rem] border border-white/8 bg-[#0a111d] p-3">
-                <div className="mb-3 flex items-center justify-between rounded-[1.1rem] border border-white/8 bg-white/[0.04] px-4 py-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-teal-200/80">Today flow</p>
-                    <p className="mt-1 text-lg font-bold text-white">한곳에서 이어지는 나의 하루</p>
-                  </div>
-                  <div className="rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-semibold text-teal-100">
-                    Synced
-                  </div>
+            <div className="rounded-[1.6rem] border border-white/8 bg-[#0a111d] p-3">
+              <div
+                  className="mb-3 flex items-center justify-between rounded-[1.1rem] border border-white/8 bg-white/[0.04] px-4 py-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.22em] text-teal-200/80">Today flow</p>
+                  <p className="mt-1 text-lg font-bold text-white">한곳에서 이어지는 나의 하루</p>
                 </div>
+                <div
+                    className="rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-semibold text-teal-100">
+                  Synced
+                </div>
+              </div>
 
-                <div className="grid gap-3 md:grid-cols-[1.4fr_0.8fr]">
-                  <div className="overflow-hidden rounded-[1.3rem] border border-white/8 bg-[#0f1728]">
-                    <img src="/feed_mockup.png" alt="JifeLog feed preview" className="h-full w-full object-cover" />
-                  </div>
-                  <div className="grid gap-3">
-                    {heroShots.slice(1).map((shot) => (
+              <div className="grid gap-3 md:grid-cols-[1.4fr_0.8fr]">
+                <div className="overflow-hidden rounded-[1.3rem] border border-white/8 bg-[#0f1728]">
+                  <img src="/feed_mockup.png" alt="JifeLog feed preview" className="h-full w-full object-cover"/>
+                </div>
+                <div className="grid gap-3">
+                  {heroShots.slice(1).map((shot) => (
                       <div key={shot} className="overflow-hidden rounded-[1.3rem] border border-white/8 bg-[#0f1728]">
-                        <img src={shot} alt="JifeLog preview" className="h-full w-full object-cover" />
+                        <img src={shot} alt="JifeLog preview" className="h-full w-full object-cover"/>
                       </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
+
 
             <motion.div
               initial={{ opacity: 0, x: 20 }}

@@ -7,6 +7,7 @@ import BookmarkDetail from '../bookmarks/BookmarkDetail';
 import AddBookmarkModal from '../bookmarks/AddBookmarkModal';
 import { Bookmark } from '../bookmarks/BookmarkCard';
 import BottomMenu from '../navigation/BottomMenu';
+import ScrollAwareFab from '../common/ScrollAwareFab';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, AlignLeft, Plus, X, Check, Calendar as CalendarIcon } from 'lucide-react';
 
@@ -131,7 +132,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     onClose={closeSidebar}
                 />
 
-                <main className="flex-1 overflow-y-auto relative w-full pb-24 md:ml-64 md:pr-64">
+                <main data-fab-scroll-container className="flex-1 overflow-y-auto relative w-full pb-24 md:ml-64 md:pr-64">
                     {selectedBookmark ? (
                         <BookmarkDetail
                             bookmark={selectedBookmark}
@@ -156,18 +157,14 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {/* Floating Action Button (FAB) - Moved up to accommodate Bottom Menu */}
 
 
-            <motion.button
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+            <ScrollAwareFab
                 onClick={() => {
                     setIsAddModalOpen(true)
                 }}
-                className="fixed right-6 bottom-24 z-30 w-14 h-14 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-teal-600 transition-colors"
+                ariaLabel="북마크 추가"
             >
                 <Plus size={28} />
-            </motion.button>
+            </ScrollAwareFab>
 
 
 

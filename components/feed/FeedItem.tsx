@@ -88,19 +88,19 @@ const FeedItem: React.FC<FeedItemProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-white/5 overflow-hidden"
+      className="bg-white dark:bg-slate-900 rounded-[28px] shadow-sm border border-slate-200/80 dark:border-white/5 overflow-hidden"
     >
       {/* 헤더 */}
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-5 pb-4">
         <div className="flex items-center gap-3">
           <img
             src={feed.author.avatar}
             alt={feed.author.name}
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-11 h-11 rounded-2xl object-cover"
           />
           <div>
-            <p className="font-medium text-slate-900 dark:text-white text-sm">{feed.author.name}</p>
-            <p className="text-xs text-slate-500 dark:text-gray-400">{formatDate(feed.createdAt)}</p>
+            <p className="font-black tracking-tight text-slate-900 dark:text-white text-sm">{feed.author.name}</p>
+            <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">{formatDate(feed.createdAt)}</p>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
       </div>
 
       {/* 컨텐츠 */}
-      <div className="px-4 pb-3">
+      <div className="px-5 pb-4">
         {isEditing ? (
           <div className="space-y-3">
             <textarea
@@ -201,7 +201,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
           </div>
         ) : (
           <>
-            <p className="text-slate-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
+            <p className="text-slate-800 dark:text-gray-200 text-[15px] leading-7 whitespace-pre-wrap">
               {feed.content.split(/(#[\w가-힣]+)/g).map((part, idx) =>
                 part.startsWith('#') ? (
                   <span key={idx} className="text-teal-600 dark:text-teal-400 cursor-pointer hover:underline">
@@ -214,7 +214,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
             </p>
 
             {feed.location && (
-              <div className="flex items-center gap-1 mt-2 text-xs text-slate-500 dark:text-gray-400">
+              <div className="flex items-center gap-1.5 mt-3 text-xs text-slate-500 dark:text-gray-400">
                 <MapPin size={12} />
                 <span>{feed.location}</span>
               </div>
@@ -239,11 +239,11 @@ const FeedItem: React.FC<FeedItemProps> = ({
       )}
 
       {/* 액션 바 */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700">
+      <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-4">
           <button
             onClick={() => onToggleLike(feed.id)}
-            className={`flex items-center gap-1.5 text-sm transition-colors ${
+            className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
               feed.isLiked
                 ? 'text-red-500'
                 : 'text-slate-500 dark:text-gray-400 hover:text-red-500'
@@ -255,7 +255,7 @@ const FeedItem: React.FC<FeedItemProps> = ({
 
           <button
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
           >
             <MessageCircle size={20} />
             <span>{feed.comments.length}</span>

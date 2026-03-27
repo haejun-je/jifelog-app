@@ -1,12 +1,13 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Plus, X } from 'lucide-react';
-import type { Feed, Schedule, DriveFile } from '@/types';
+import { Send, Plus, X, Sparkles, Clock3, PenSquare, ChevronRight, MessageCircle, Heart } from 'lucide-react';
+import type { Feed, Schedule } from '@/types';
 import FeedCreateForm from '@/components/feed/FeedCreateForm';
 import FeedItem from '@/components/feed/FeedItem';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import FeedSideMenu from '@/components/feed/FeedSideMenu';
+import ScrollAwareFab from '@/components/common/ScrollAwareFab';
 
 interface FeedPageProps {
   currentUserId?: string;
@@ -17,32 +18,6 @@ const mockSchedules: Schedule[] = [
   { id: '2', title: '프로젝트 마감', date: '2026-02-20', time: '18:00', dDay: 3 },
   { id: '3', title: '고객 미팅', date: '2026-02-21', time: '10:00', dDay: 4 },
 ];
-
-const mockDriveFiles: DriveFile[] = [
-  { id: '1', name: '프로젝트 기획서.pdf', extension: 'pdf', updatedAt: '2026-02-17T10:30:00' },
-  { id: '2', name: '디자인 시안.fig', extension: 'fig', updatedAt: '2026-02-16T15:20:00' },
-  { id: '3', name: '회의록.docx', extension: 'docx', updatedAt: '2026-02-15T09:00:00' },
-  { id: '4', name: '예산안.xlsx', extension: 'xlsx', updatedAt: '2026-02-14T14:45:00' },
-];
-
-const getExtensionIcon = (ext: string): string => {
-  const icons: Record<string, string> = {
-    pdf: '📄',
-    doc: '📝',
-    docx: '📝',
-    xls: '📊',
-    xlsx: '📊',
-    ppt: '📊',
-    pptx: '📊',
-    fig: '🎨',
-    png: '🖼️',
-    jpg: '🖼️',
-    jpeg: '🖼️',
-    mp4: '🎬',
-    mp3: '🎵',
-  };
-  return icons[ext.toLowerCase()] || '📎';
-};
 
 const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -343,8 +318,40 @@ const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
     ));
   };
 
+  const currentUser = feeds.find((feed) => feed.authorId === currentUserId)?.author ?? {
+    id: currentUserId,
+    name: '홍길동',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100',
+  };
+  const unreadMessagesCount = 3;
+
+  const briefing = useMemo(() => {
+    const myFeeds = feeds.filter((feed) => feed.authorId === currentUserId);
+    const nextSchedule = [...mockSchedules].sort((a, b) => a.dDay - b.dDay)[0];
+    const latestFeed = myFeeds[0];
+    const todayLikes = myFeeds.reduce((sum, feed) => sum + feed.likes, 0);
+
+    return {
+      summary: `${currentUser.name}님, 아직 확인하지 않은 메시지 ${unreadMessagesCount}개가 있습니다.`,
+      scheduleLabel: nextSchedule ? `${nextSchedule.title} · ${nextSchedule.time || '시간 미정'}` : '예정된 일정 없음',
+      latest: latestFeed ? latestFeed.content.replace(/#(\w+)/g, '').trim() : '오늘의 기록을 남겨보세요.',
+      utilityCards: [
+        {
+          label: '읽지 않은 메시지',
+          value: `${unreadMessagesCount}개`,
+          icon: MessageCircle,
+        },
+        {
+          label: '오늘 받은 좋아요',
+          value: `${todayLikes}개`,
+          icon: Heart,
+        },
+      ],
+    };
+  }, [feeds, currentUserId, currentUser.name, unreadMessagesCount]);
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] transition-colors flex flex-col">
       <UniversalHeader 
         title="피드"
         onMenuClick={openMenu}
@@ -359,81 +366,134 @@ const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
         <FeedSideMenu isOpen={isMenuOpen} onClose={closeMenu} />
         
-        <main className="flex-1 overflow-y-auto w-full relative md:ml-64">
-          <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
-            {/* 대시보드 영역 */}
+        <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative md:ml-64">
+          <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 space-y-4"
+              className="mb-6 space-y-5"
             >
-              {/* 다가오는 일정 */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-white/5">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                  다가오는 일정
-                </h3>
-                <div className="space-y-2">
+              <section className="overflow-hidden rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.08)] dark:shadow-none">
+                <div className="relative px-5 py-5 md:px-6 md:py-6">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.18),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(56,189,248,0.12),transparent_34%)]" />
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-teal-500/80 dark:text-teal-300/80">
+                          Daily Briefing
+                        </p>
+
+                      </div>
+                      <img
+                        src={currentUser.avatar}
+                        alt={currentUser.name}
+                        className="hidden sm:block w-14 h-14 rounded-2xl object-cover ring-4 ring-white/70 dark:ring-slate-900/60"
+                      />
+                    </div>
+
+                    <div className="mt-5">
+                      <div className="rounded-[22px] border border-slate-200/80 dark:border-white/5 bg-slate-50/85 dark:bg-slate-950/40 p-4">
+                        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                          <Sparkles size={14} className="text-teal-500" />
+                          회고 포인트
+                        </div>
+                        <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                          {briefing.latest}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 grid-cols-2">
+                      {briefing.utilityCards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                        <div key={card.label} className="rounded-2xl bg-white/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/5 px-4 py-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                              {card.label}
+                            </div>
+                            <Icon size={14} className="text-slate-400 dark:text-slate-500" />
+                          </div>
+                          <div className="mt-2 text-lg md:text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                            {card.value}
+                          </div>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="px-5 py-4 md:px-6 border-b border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                      Upcoming
+                    </p>
+                    <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                      다가오는 일정
+                    </h3>
+                  </div>
+                  <button className="h-10 px-3 rounded-xl text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+                <div className="px-5 py-4 md:px-6 grid gap-3">
                   {mockSchedules.slice(0, 3).map(schedule => (
                     <div
                       key={schedule.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50"
+                      className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 px-4 py-3"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center">
-                          <span className="text-lg">📅</span>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center flex-shrink-0">
+                          <Clock3 size={20} />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{schedule.title}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black tracking-tight text-slate-900 dark:text-white">{schedule.title}</p>
                           <p className="text-xs text-slate-500 dark:text-gray-400">
                             {schedule.date} {schedule.time && `· ${schedule.time}`}
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                      <span className={`text-xs font-bold px-2.5 py-1.5 rounded-full ${
                         schedule.dDay === 0
                           ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
                           : schedule.dDay === 1
                           ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400'
-                          : 'bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-400'
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                       }`}>
                         D-{schedule.dDay}
                       </span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              {/* 최근 드라이브 파일 */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-white/5">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                  최근 드라이브 파일
-                </h3>
-                <div className="space-y-2">
-                  {mockDriveFiles.slice(0, 4).map(file => (
-                    <div
-                      key={file.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{getExtensionIcon(file.extension)}</span>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[180px]">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-gray-400">
-                            {new Date(file.updatedAt).toLocaleDateString('ko-KR')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <section className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="px-5 py-4 md:px-6 flex items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/5">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                      Journal
+                    </p>
+                    <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                      오늘의 기록
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="h-10 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-black hover:opacity-90 transition-opacity flex items-center gap-2"
+                  >
+                    <PenSquare size={16} />
+                    작성
+                  </button>
                 </div>
-              </div>
+                <div className="px-5 py-4 md:px-6 text-sm text-slate-500 dark:text-slate-400">
+                  내 기록을 시간순으로 확인
+                </div>
+              </section>
             </motion.div>
 
-            {/* 피드 작성 폼 */}
             <div className="space-y-4 mt-6">
               <AnimatePresence mode="popLayout">
                 {feeds.map(feed => (
@@ -497,16 +557,12 @@ const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
         )}
       </AnimatePresence>
 
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+      <ScrollAwareFab
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed right-6 bottom-24 z-30 w-14 h-14 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-teal-600 transition-colors"
+        ariaLabel="피드 작성"
       >
         <Plus size={28} />
-      </motion.button>
+      </ScrollAwareFab>
     </div>
   );
 };

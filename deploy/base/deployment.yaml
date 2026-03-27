@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jifelog-app
+  labels:
+    app: jifelog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jifelog-app
+  template:
+    metadata:
+      labels:
+        app: jifelog-app
+    spec:
+      containers:
+        - name: jifelog-app
+          image: jifelog-app
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
