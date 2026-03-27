@@ -48,7 +48,7 @@ jobs:
         run: rm -f ~/.npmrc
 
       - name: Build frontend app
-        run: npm run build -- --mode development
+        run: npm run build -- --mode dev
 
       - name: Set image metadata
         run: |
@@ -69,7 +69,7 @@ jobs:
           docker build \
             --build-arg GH_PACKAGES_TOKEN="${GH_PACKAGES_TOKEN}" \
             --build-arg GH_ID="${GH_ID}" \
-            --build-arg VITE_MODE="development" \
+            --build-arg VITE_MODE="dev" \
             -t "${IMAGE_REPO}:${IMAGE_TAG}" \
             -t "${IMAGE_REPO}:dev-latest" \
             .

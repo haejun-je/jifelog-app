@@ -5,7 +5,7 @@ WORKDIR /app
 ARG GH_PACKAGES_TOKEN
 ARG GH_ID
 ARG GEMINI_API_KEY=""
-ARG VITE_MODE=production
+ARG VITE_MODE
 
 COPY package.json package-lock.json ./
 
