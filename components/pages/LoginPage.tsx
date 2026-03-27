@@ -1,20 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock, Mail, Sparkles } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Lock, Mail } from 'lucide-react';
+import { ApiError, login } from '../../api/auth';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateEmail(value: string): boolean {
+  return EMAIL_REGEX.test(value);
+}
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [isEmailValid, setIsEmailValid] = useState(true);
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const handleLogin = () => {
-    if (!email || !password) {
+  useEffect(() => {
+    setIsEmailValid(email ? validateEmail(email) : true);
+  }, [email]);
+
+  const handleLogin = async () => {
+    if (!email || !password || !isEmailValid || isLoggingIn) {
       return;
     }
 
-    console.log('Login attempt', { email, password });
-    navigate('/');
+    setIsLoggingIn(true);
+    setLoginError('');
+
+    try {
+      await login(email, password);
+      navigate('/');
+    } catch (err) {
+      setLoginError(err instanceof ApiError ? err.message : '네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -81,10 +104,26 @@ const LoginPage: React.FC = () => {
                       placeholder="이메일 주소"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full border-0 border-b border-white/12 bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:border-teal-400 focus:outline-none"
+                      className={`w-full border-0 border-b bg-transparent py-4 pl-11 pr-1 text-base text-white placeholder-slate-500 transition-all focus:outline-none ${
+                        !isEmailValid && email
+                          ? 'border-red-500/60 focus:border-red-500'
+                          : 'border-white/12 focus:border-teal-400'
+                      }`}
                     />
-                    <Mail className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-teal-400" />
+                    <Mail
+                      className={`absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 transition-colors ${
+                        !isEmailValid && email
+                          ? 'text-red-500'
+                          : 'text-slate-500 group-focus-within:text-teal-400'
+                      }`}
+                    />
                   </div>
+                  {!isEmailValid && email && (
+                    <p className="ml-1 flex items-center gap-1 text-xs text-red-400">
+                      <AlertCircle size={12} />
+                      올바른 이메일 형식을 입력해주세요
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5 pt-7">
@@ -109,11 +148,18 @@ const LoginPage: React.FC = () => {
                 <div className="space-y-4 pt-7">
                   <button
                     onClick={handleLogin}
-                    disabled={!email || !password}
+                    disabled={!email || !password || !isEmailValid || isLoggingIn}
                     className="w-full rounded-full bg-gradient-to-r from-teal-400 to-teal-500 py-4 text-sm font-black text-slate-950 transition-all hover:from-teal-300 hover:to-teal-400 hover:shadow-[0_18px_50px_rgba(45,212,191,0.22)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
                   >
-                    로그인
+                    {isLoggingIn ? '로그인 중...' : '로그인'}
                   </button>
+
+                  {loginError && (
+                    <p className="flex items-center gap-1 text-xs text-red-400">
+                      <AlertCircle size={12} />
+                      {loginError}
+                    </p>
+                  )}
 
                   <button className="w-full rounded-full border border-white/10 bg-white/[0.04] py-4 text-sm font-semibold text-white transition-colors hover:bg-white/[0.08]">
                     Google로 계속하기
