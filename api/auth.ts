@@ -41,7 +41,10 @@ function authUrl(path: string): string {
 }
 
 async function fetchAuth(path: string, init?: RequestInit): Promise<Response> {
-  const res = await fetch(authUrl(path), init);
+  const res = await fetch(authUrl(path), {
+    credentials: 'include',
+    ...init,
+  });
 
   if (!res.ok) {
     throw await parseErrorResponse(res);
