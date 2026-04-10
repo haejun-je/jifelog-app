@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Plus, X, Sparkles, Clock3, PenSquare, ChevronRight, MessageCircle, Heart } from 'lucide-react';
+import { Send, Plus, X, Clock3, PenSquare, ChevronRight, MessageCircle, Heart, BookOpen } from 'lucide-react';
 import type { Feed, Schedule } from '@/types';
 import FeedCreateForm from '@/components/feed/FeedCreateForm';
 import FeedItem from '@/components/feed/FeedItem';
@@ -373,95 +373,94 @@ const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 space-y-5"
             >
-              <section className="overflow-hidden rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.08)] dark:shadow-none">
-                <div className="relative px-5 py-5 md:px-6 md:py-6">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.18),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(56,189,248,0.12),transparent_34%)]" />
-                  <div className="relative">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-teal-500/80 dark:text-teal-300/80">
-                          Daily Briefing
-                        </p>
+              <section className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900">
+                <div className="px-5 py-5 md:px-6 md:py-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
+                        Daily Briefing
+                      </p>
+                      <h2 className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
+                        {currentUser.name}님의 하루
+                      </h2>
+                    </div>
+                    <img
+                      src={currentUser.avatar}
+                      alt={currentUser.name}
+                      className="hidden sm:block w-12 h-12 rounded-xl object-cover ring-2 ring-slate-100 dark:ring-slate-700"
+                    />
+                  </div>
 
+                  <div className="mt-4">
+                    <div className="rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-4">
+                      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        <BookOpen size={13} />
+                        최근 기록
                       </div>
-                      <img
-                        src={currentUser.avatar}
-                        alt={currentUser.name}
-                        className="hidden sm:block w-14 h-14 rounded-2xl object-cover ring-4 ring-white/70 dark:ring-slate-900/60"
-                      />
+                      <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                        {briefing.latest}
+                      </p>
                     </div>
+                  </div>
 
-                    <div className="mt-5">
-                      <div className="rounded-[22px] border border-slate-200/80 dark:border-white/5 bg-slate-50/85 dark:bg-slate-950/40 p-4">
-                        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                          <Sparkles size={14} className="text-teal-500" />
-                          회고 포인트
+                  <div className="mt-3 grid gap-3 grid-cols-2">
+                    {briefing.utilityCards.map((card) => {
+                      const Icon = card.icon;
+                      return (
+                      <div key={card.label} className="rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 px-4 py-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                            {card.label}
+                          </div>
+                          <Icon size={13} className="text-slate-300 dark:text-slate-600 flex-shrink-0" />
                         </div>
-                        <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
-                          {briefing.latest}
-                        </p>
+                        <div className="mt-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                          {card.value}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-3 grid-cols-2">
-                      {briefing.utilityCards.map((card) => {
-                        const Icon = card.icon;
-                        return (
-                        <div key={card.label} className="rounded-2xl bg-white/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/5 px-4 py-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
-                              {card.label}
-                            </div>
-                            <Icon size={14} className="text-slate-400 dark:text-slate-500" />
-                          </div>
-                          <div className="mt-2 text-lg md:text-xl font-black tracking-tight text-slate-900 dark:text-white">
-                            {card.value}
-                          </div>
-                        </div>
-                        );
-                      })}
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
               </section>
 
-              <section className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
-                <div className="px-5 py-4 md:px-6 border-b border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-4">
+              <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="px-5 py-4 md:px-6 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
                       Upcoming
                     </p>
-                    <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                    <h3 className="mt-1 text-base font-bold text-slate-900 dark:text-white">
                       다가오는 일정
                     </h3>
                   </div>
-                  <button className="h-10 px-3 rounded-xl text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <ChevronRight size={18} />
+                  <button className="h-9 px-2.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <ChevronRight size={16} />
                   </button>
                 </div>
-                <div className="px-5 py-4 md:px-6 grid gap-3">
+                <div className="px-5 py-4 md:px-6 grid gap-2">
                   {mockSchedules.slice(0, 3).map(schedule => (
                     <div
                       key={schedule.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 px-4 py-3"
+                      className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 px-4 py-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center flex-shrink-0">
-                          <Clock3 size={20} />
+                        <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 flex items-center justify-center flex-shrink-0">
+                          <Clock3 size={16} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-black tracking-tight text-slate-900 dark:text-white">{schedule.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-400">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{schedule.title}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                             {schedule.date} {schedule.time && `· ${schedule.time}`}
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs font-bold px-2.5 py-1.5 rounded-full ${
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-md ${
                         schedule.dDay === 0
-                          ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
+                          ? 'bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400'
                           : schedule.dDay === 1
-                          ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400'
-                          : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                          ? 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                          : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400'
                       }`}>
                         D-{schedule.dDay}
                       </span>
@@ -470,25 +469,25 @@ const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
                 </div>
               </section>
 
-              <section className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
-                <div className="px-5 py-4 md:px-6 flex items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/5">
+              <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="px-5 py-4 md:px-6 flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700/60">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
                       Journal
                     </p>
-                    <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                    <h3 className="mt-1 text-base font-bold text-slate-900 dark:text-white">
                       오늘의 기록
                     </h3>
                   </div>
                   <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="h-10 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-black hover:opacity-90 transition-opacity flex items-center gap-2"
+                    className="h-9 px-3.5 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-sm font-semibold hover:opacity-80 transition-opacity flex items-center gap-1.5"
                   >
-                    <PenSquare size={16} />
+                    <PenSquare size={14} />
                     작성
                   </button>
                 </div>
-                <div className="px-5 py-4 md:px-6 text-sm text-slate-500 dark:text-slate-400">
+                <div className="px-5 py-4 md:px-6 text-sm text-slate-400 dark:text-slate-500">
                   내 기록을 시간순으로 확인
                 </div>
               </section>

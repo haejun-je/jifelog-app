@@ -16,6 +16,10 @@ import LoginPage from './components/pages/LoginPage';
 import NodesPage from './components/pages/NodesPage';
 import CalendarPage from './components/pages/CalendarPage';
 import FeedPage from './components/pages/FeedPage';
+import DiaryListPage from './components/pages/DiaryListPage';
+import DiaryWritePage from './components/pages/DiaryWritePage';
+import DiaryDetailPage from './components/pages/DiaryDetailPage';
+import DiaryEditPage from './components/pages/DiaryEditPage';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -148,6 +152,10 @@ const App: React.FC = () => {
         <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/calendar" element={<MainLayout><CalendarPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
+        <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
+        <Route path="/diary/write" element={<MainLayout><DiaryWritePage /></MainLayout>} />
+        <Route path="/diary/:id/edit" element={<MainLayout><DiaryEditPage /></MainLayout>} />
+        <Route path="/diary/:id" element={<MainLayout><DiaryDetailPage /></MainLayout>} />
         <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
 
         <Route path="/signup" element={<SignupPage />} />

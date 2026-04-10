@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layout, HardDrive, Calendar, Bookmark, Settings, Bot } from 'lucide-react';
+import { Layout, HardDrive, Calendar, Bookmark, Bot, BookOpen } from 'lucide-react';
 
 const BottomMenu: React.FC = () => {
     const location = useLocation();
@@ -13,6 +13,7 @@ const BottomMenu: React.FC = () => {
         { label: 'AI 비서', icon: Bot, path: '/ai' },
         { label: '일정', icon: Calendar, path: '/calendar' },
         { label: '즐겨찾기', icon: Bookmark, path: '/bookmarks' },
+        { label: '일기', icon: BookOpen, path: '/diary' },
     ];
 
     return (
