@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronLeft, Search, Star, Clock, Image, Video, FileText, Music,
-  Folder, MoreVertical, Trash2, HardDrive, ChevronRight, Menu, Plus
+  Search, Star, Clock, Image, Video, FileText, Music,
+  Folder, MoreVertical, HardDrive, ChevronRight, Plus, X
 } from 'lucide-react';
 import SideMenu from '../drive/SideMenu';
 import ScrollAwareFab from '../common/ScrollAwareFab';
-
 import UniversalHeader from '../layout/UniversalHeader';
 
 interface DrivePageProps {
@@ -17,6 +17,7 @@ interface DrivePageProps {
 const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllNodes }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuHistoryRef = useRef(false);
@@ -105,7 +106,49 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         onBack={onBack}
         showBack={false}
         onMenuClick={openMenu}
+        rightAction={
+          <button
+            onClick={() => { setIsSearchOpen((v) => !v); setSearchQuery(''); }}
+            className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label={isSearchOpen ? '검색 닫기' : '검색'}
+          >
+            {isSearchOpen ? <X size={20} /> : <Search size={20} />}
+          </button>
+        }
       />
+
+      {/* Search Overlay */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 z-30 flex-shrink-0"
+          >
+            <div className="px-4 py-3 flex items-center gap-2">
+              <Search size={16} className="text-slate-400 flex-shrink-0" />
+              <input
+                autoFocus
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="파일, 폴더 검색"
+                className="flex-1 bg-transparent text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content Wrapper */}
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
@@ -116,37 +159,9 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative md:ml-64">
           <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
 
-            <section className={`pt-5 md:pt-6 transition-all duration-500 ease-in-out ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <div className="overflow-hidden rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.08)] dark:shadow-none">
-                <div className="relative px-5 py-5 md:px-7 md:py-7">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.16),transparent_32%),radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_28%)]" />
-                  <div className="relative space-y-4">
-                    <div className="space-y-3">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-teal-500/80 dark:text-teal-300/80">
-                        My Drive
-                      </p>
-                    </div>
-
-                    <div className="grid gap-3">
-                        <div className="relative">
-                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                          <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="파일, 폴더 검색"
-                            className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/5 pl-12 pr-4 py-3.5 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/40 transition-all"
-                          />
-                        </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
             {/* Categories Grid */}
-            <section className={`mt-6 transition-all duration-500 ease-in-out delay-75 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <div className="mt-4 grid grid-cols-3 gap-3">
+            <section className={`transition-all duration-500 ease-in-out delay-75 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className="grid grid-cols-3 gap-3">
                 {categories.map((cat, i) => (
                   <button
                     key={i}
@@ -159,7 +174,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                       <ChevronRight size={16} className="mt-1 text-slate-300 dark:text-slate-600 group-hover:text-teal-500 transition-colors" />
                     </div>
                     <div className="mt-4">
-                      <div className="text-sm font-black tracking-tight text-slate-900 dark:text-white break-keep">
+                      <div className="text-sm font-medium text-slate-700 dark:text-slate-200 break-keep">
                         {cat.label}
                       </div>
                     </div>
@@ -180,7 +195,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
                             <Clock size={14} /> Recent Files
                           </p>
-                          <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                          <h3 className="mt-1 text-base font-semibold text-slate-800 dark:text-white">
                             최근 파일
                           </h3>
                         </div>
@@ -199,7 +214,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                                 {getFileIcon(file.type)}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <div className="text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
+                                <div className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
                                   {file.name}
                                 </div>
                                 <div className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
@@ -209,32 +224,6 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                               <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-teal-500 transition-colors" />
                             </div>
                           </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[24px] border border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-slate-950/40 p-4 md:p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
-                        Shortcuts
-                      </p>
-                      <h3 className="mt-2 text-xl font-black tracking-tight text-slate-900 dark:text-white">
-                        자주 여는 폴더
-                      </h3>
-                      <div className="mt-5 space-y-3">
-                        {folders.slice(0, 2).map((folder, i) => (
-                          <div key={i} className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-white/5 px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-11 h-11 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-                                <Folder size={22} />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-sm font-black text-slate-900 dark:text-white truncate">{folder.name}</div>
-                                <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                  항목 {folder.items}개 • 수정 {folder.date}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
                         ))}
                       </div>
                     </div>
@@ -250,7 +239,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                       <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
                         <Folder size={14} /> My Drive
                       </p>
-                      <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                      <h3 className="mt-1 text-base font-semibold text-slate-800 dark:text-white">
                         내 드라이브
                       </h3>
                     </div>
@@ -267,7 +256,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                               <Folder size={24} />
                             </div>
                             <div className="min-w-0">
-                              <div className="text-[15px] font-black tracking-tight text-slate-800 dark:text-white mb-1 truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                              <div className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1 truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                                 {folder.name}
                               </div>
                               <div className="text-[12px] text-slate-500 dark:text-gray-400">
@@ -294,7 +283,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
                             Storage
                           </p>
-                          <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                          <h3 className="mt-2 text-lg font-semibold text-slate-800 dark:text-white">
                             {storageUsed} GB / {storageTotal} GB
                           </h3>
                         </div>
@@ -319,10 +308,10 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
 
                     <div className="border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-white/5 px-5 py-5 md:px-6 flex items-center justify-between gap-4 bg-slate-50/70 dark:bg-slate-950/30">
                       <div>
-                        <div className="text-sm font-black text-slate-900 dark:text-white">휴지통</div>
+                        <div className="text-sm font-medium text-slate-800 dark:text-white">휴지통</div>
                         <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">삭제 항목 보기</div>
                       </div>
-                      <button className="h-10 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-black hover:opacity-90 transition-opacity">
+                      <button className="h-10 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition-opacity">
                         열기
                       </button>
                     </div>
