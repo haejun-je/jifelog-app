@@ -9,7 +9,7 @@ resources:
 images:
   - name: jifelog-app
     newName: jhjun07/jifelog-app
-    newTag: dev-0cfbe69d0b465a34dea31b405b2a9754c6d715aa
+    newTag: dev-aacbb3139d91c7bd577e7ac7c3c6959a81e31483
 
 patches:
   - path: patch-deployment.yaml
