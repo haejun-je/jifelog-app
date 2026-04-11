@@ -32,7 +32,7 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
                 {onMenuClick && (
                     <button
                         onClick={onMenuClick}
-                        className="md:hidden p-2 -ml-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 -ml-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
                         <Menu size={24} />
                     </button>

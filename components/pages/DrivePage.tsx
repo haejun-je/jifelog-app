@@ -156,7 +156,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         <SideMenu isOpen={isMenuOpen} onClose={closeMenu} />
 
         {/* Main Content */}
-        <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative md:ml-64">
+        <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative">
           <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
 
             {/* Categories Grid */}
@@ -187,7 +187,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
             <div className="flex-1 space-y-8 mt-8">
               <section className={`transition-all duration-500 ease-in-out delay-100 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                 <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
-                  <div className="grid gap-6 px-5 py-5 md:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+                  <div className="px-5 py-5 md:px-6">
               {/* Recent Files Grid */}
                     <div>
                       <div className="flex justify-between items-center mb-4">

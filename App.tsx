@@ -152,7 +152,7 @@ const App: React.FC = () => {
         <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
         <Route path="/calendar" element={<MainLayout><CalendarPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
+        <Route path="/feed" element={<MainLayout><FeedPageV2 /></MainLayout>} />
         <Route path="/feed-v2" element={<MainLayout><FeedPageV2 /></MainLayout>} />
         <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
         <Route path="/diary/write" element={<MainLayout><DiaryWritePage /></MainLayout>} />

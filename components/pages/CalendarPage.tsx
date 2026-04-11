@@ -474,7 +474,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         mainContentRef.current = node;
                     }}
                     data-fab-scroll-container
-                    className="flex-1 overflow-y-auto w-full relative md:ml-64 custom-scrollbar"
+                    className="flex-1 overflow-y-auto w-full relative custom-scrollbar"
                 >
                     <motion.div
                         className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 overflow-hidden flex-shrink-0 flex flex-col"
