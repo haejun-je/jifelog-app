@@ -11,7 +11,8 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
   const [emotion, setEmotion] = useState<string | null>(initialValues?.emotion ?? null);
   const [weather, setWeather] = useState<string | null>(initialValues?.weather ?? null);
   const [content, setContent] = useState(initialValues?.content ?? '');
-  const [satisfaction, setSatisfaction] = useState<number | null>(initialValues?.satisfaction ?? null);
+  const [energy, setEnergy] = useState<number | null>(initialValues?.energy ?? 3);
+  const [satisfaction, setSatisfaction] = useState<number | null>(initialValues?.satisfaction ?? 3);
   const [keywords, setKeywords] = useState<string[]>(initialValues?.keywords ?? []);
   const [goodThings, setGoodThings] = useState<string[]>(initialValues?.goodThings ?? []);
   const [badThings, setBadThings] = useState<string[]>(initialValues?.badThings ?? []);
@@ -20,13 +21,14 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
 
   const canSubmit =
     !isSubmitting &&
-    (!!emotion || !!weather || content.trim().length > 0 || satisfaction !== null || keywords.length > 0);
+    (!!emotion || !!weather || content.trim().length > 0 || energy !== null || satisfaction !== null || keywords.length > 0);
 
   function initForm(values: DiaryFormState) {
     setDate(values.date);
     setEmotion(values.emotion);
     setWeather(values.weather);
     setContent(values.content);
+    setEnergy(values.energy);
     setSatisfaction(values.satisfaction);
     setKeywords(values.keywords);
     setGoodThings(values.goodThings);
@@ -43,6 +45,7 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
         emotion: emotion as EmotionKey | null,
         weather: weather as WeatherKey | null,
         content,
+        energy,
         satisfaction,
         keywords,
         goodThings,
@@ -67,6 +70,7 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
         emotion: emotion as EmotionKey | null,
         weather: weather as WeatherKey | null,
         content,
+        energy,
         satisfaction,
         keywords,
         goodThings,
@@ -86,6 +90,7 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
     emotion, setEmotion,
     weather, setWeather,
     content, setContent,
+    energy, setEnergy,
     satisfaction, setSatisfaction,
     keywords, setKeywords,
     goodThings, setGoodThings,

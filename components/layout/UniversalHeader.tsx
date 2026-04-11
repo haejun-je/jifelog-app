@@ -18,7 +18,7 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
     rightAction
 }) => {
     return (
-        <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 h-16 px-5 flex items-center justify-between flex-shrink-0 transition-colors">
+        <header className="fixed top-0 left-0 right-0 md:left-16 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 h-16 px-5 flex items-center justify-between flex-shrink-0 transition-colors">
             {/* Left: Back Button & Title */}
             <div className="flex items-center gap-3">
                 {showBack && onBack && (

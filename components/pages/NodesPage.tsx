@@ -41,7 +41,7 @@ const NodesPage: React.FC<NodesPageProps> = ({ onBack }) => {
             />
 
             {/* Content Wrapper */}
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+            <div className="flex flex-1 overflow-hidden h-screen pt-16">
                 {/* Sidebar (Responsive) */}
                 <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 

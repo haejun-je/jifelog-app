@@ -117,47 +117,48 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
         }
       />
 
-      {/* Search Overlay */}
-      <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 z-30 flex-shrink-0"
-          >
-            <div className="px-4 py-3 flex items-center gap-2">
-              <Search size={16} className="text-slate-400 flex-shrink-0" />
-              <input
-                autoFocus
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="파일, 폴더 검색"
-                className="flex-1 bg-transparent text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="flex flex-1 flex-col overflow-hidden h-screen pt-16">
+        {/* Search Overlay */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 z-30 flex-shrink-0"
+            >
+              <div className="px-4 py-3 flex items-center gap-2">
+                <Search size={16} className="text-slate-400 flex-shrink-0" />
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="파일, 폴더 검색"
+                  className="flex-1 bg-transparent text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Content Wrapper */}
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+        {/* Content Wrapper */}
+        <div className="flex flex-1 overflow-hidden min-h-0">
         {/* Sidebar (Responsive) */}
-        <SideMenu isOpen={isMenuOpen} onClose={closeMenu} />
+          <SideMenu isOpen={isMenuOpen} onClose={closeMenu} />
 
-        {/* Main Content */}
-        <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative">
-          <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
+          {/* Main Content */}
+          <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative">
+            <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
 
             {/* Categories Grid */}
             <section className={`transition-all duration-500 ease-in-out delay-75 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -319,8 +320,9 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                 </div>
               </section>
             </div>
-          </div>
-        </main>
+            </div>
+          </main>
+        </div>
       </div>
       <input
         type="file"
