@@ -8,7 +8,7 @@ interface WeatherPickerProps {
 
 const WeatherPicker: React.FC<WeatherPickerProps> = ({ value, onChange }) => {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="no-scrollbar flex w-full min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-1">
       {WEATHER_OPTIONS.map((option) => {
         const Icon = option.icon;
         const isSelected = value === option.key;
@@ -17,7 +17,7 @@ const WeatherPicker: React.FC<WeatherPickerProps> = ({ value, onChange }) => {
             key={option.key}
             type="button"
             onClick={() => onChange(isSelected ? null : option.key)}
-            className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-colors ${
+            className={`flex h-[72px] min-w-[64px] flex-shrink-0 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2.5 text-center transition-colors ${
               isSelected
                 ? 'bg-teal-500 text-white'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     Calendar as CalendarIcon,
     Check,
@@ -16,36 +17,15 @@ import UniversalHeader from '../layout/UniversalHeader';
 import AddCalendarModal from './calendar/AddCalendarModal';
 import CustomCalendarView from './calendar/CustomCalendarView';
 import DayScheduleModal from './calendar/DayScheduleModal';
-import RegisterPage from './calendar/RegisterPage';
-import ScheduleDetailPage from './calendar/ScheduleDetailPage';
-import TodoDetailPage from './calendar/TodoDetailPage';
-import type { AppView, Schedule, Todo } from './calendar/types';
-import { formatMonthYear, toLocalDateStr } from './calendar/utils';
+import type { Schedule, Todo } from './calendar/types';
+import { formatMonthYear } from './calendar/utils';
+import { useCalendarContext } from './calendar/CalendarContext';
 
 const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const [view, setView] = useState<AppView>('calendar');
-    const [registerInitialTab, setRegisterInitialTab] = useState<'schedule' | 'todo'>('schedule');
+    const navigate = useNavigate();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [isAddCalendarModalOpen, setIsAddCalendarModalOpen] = useState(false);
     const [isDayScheduleModalOpen, setIsDayScheduleModalOpen] = useState(false);
-
-    const [calendars, setCalendars] = useState<CalendarCategory[]>([
-        { id: 'my', name: '나의 캘린더', color: '#10b981', isVisible: true },
-        { id: 'concert', name: '콘서트', color: '#8b5cf6', isVisible: true },
-        { id: 'company', name: '회사', color: '#3b82f6', isVisible: true },
-    ]);
-    const [schedules, setSchedules] = useState<Schedule[]>([
-        { id: '1', title: '팀 회의', start: '2026-01-23T14:00:00', end: '2026-01-23T15:30:00', allDay: false, calendarId: 'company', description: '주간 업무 보고' },
-        { id: '2', title: '저녁 약속', start: '2026-01-23T19:00:00', end: '2026-01-23T21:00:00', allDay: false, calendarId: 'my' },
-        { id: '3', title: '아이유 콘서트', start: '2026-01-24T18:00:00', end: '2026-01-24T22:00:00', allDay: false, calendarId: 'concert', location: 'KSPO 돔' },
-        { id: '4', title: '설날 연휴', start: '2026-01-28', end: '2026-01-31', allDay: true, calendarId: 'my' },
-        { id: '5', title: '프로젝트 런칭', start: '2026-01-18T10:00:00', end: '2026-01-20T12:00:00', allDay: true, calendarId: 'company' },
-    ]);
-    const [todos, setTodos] = useState<Todo[]>([]);
-
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
-    const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
     const [daySchedules, setDaySchedules] = useState<Schedule[]>([]);
     const [dayTodos, setDayTodos] = useState<Todo[]>([]);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -54,12 +34,20 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const mainContentRef = useRef<HTMLDivElement>(null);
     const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const sidebarHistoryRef = useRef(false);
-    const overlayHistoryRef = useRef(false);
     const [calendarHeight, setCalendarHeight] = useState(window.innerHeight - 192);
     const [scrollRatio, setScrollRatio] = useState(0);
-
-    const toggleCalendarVisibility = (id: string) =>
-        setCalendars((prev) => prev.map((calendar) => calendar.id === id ? { ...calendar, isVisible: !calendar.isVisible } : calendar));
+    const {
+        calendars,
+        setCalendars,
+        allVisibleSchedules,
+        todos,
+        selectedDate,
+        setSelectedDate,
+        toggleCalendarVisibility,
+        getSchedulesForDate,
+        getTodosForDate,
+        toggleTodoComplete,
+    } = useCalendarContext();
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -78,92 +66,6 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setSidebarOpen(false);
     };
 
-    const closeOverlayToCalendar = () => {
-        if (overlayHistoryRef.current) {
-            window.history.back();
-            return;
-        }
-
-        overlayHistoryRef.current = false;
-        setEditingSchedule(null);
-        setEditingTodo(null);
-        setView('calendar');
-    };
-
-    const allVisibleSchedules = useMemo(() => {
-        const visibleIds = calendars.filter((calendar) => calendar.isVisible).map((calendar) => calendar.id);
-        return schedules.filter((schedule) => visibleIds.includes(schedule.calendarId));
-    }, [schedules, calendars]);
-
-    const getSchedulesForDate = (date: Date) => {
-        const target = new Date(date);
-        target.setHours(0, 0, 0, 0);
-
-        return allVisibleSchedules.filter((schedule) => {
-            const start = new Date(schedule.start);
-            start.setHours(0, 0, 0, 0);
-            const end = new Date(schedule.end);
-            end.setHours(0, 0, 0, 0);
-            return target >= start && target <= end;
-        }).sort((a, b) => a.start.localeCompare(b.start));
-    };
-
-    const getTodosForDate = (date: Date): Todo[] =>
-        todos.filter((todo) => todo.date === toLocalDateStr(date));
-
-    const handleToggleTodoComplete = (id: string) => {
-        setTodos((prev) => prev.map((todo) => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
-        setDayTodos((prev) => prev.map((todo) => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
-        setEditingTodo((prev) => prev?.id === id ? { ...prev, completed: !prev.completed } : prev);
-    };
-
-    const handleDeleteSchedule = (id: string) => {
-        setSchedules((prev) => prev.filter((schedule) => schedule.id !== id));
-        setEditingSchedule(null);
-        closeOverlayToCalendar();
-    };
-
-    const handleDeleteTodo = (id: string) => {
-        setTodos((prev) => prev.filter((todo) => todo.id !== id));
-        setEditingTodo(null);
-        closeOverlayToCalendar();
-    };
-
-    const handleSaveSchedule = (data: Omit<Schedule, 'id'>) => {
-        if (editingSchedule) {
-            const updated = { ...editingSchedule, ...data };
-            setSchedules((prev) => prev.map((schedule) => schedule.id === editingSchedule.id ? updated : schedule));
-            setEditingSchedule(updated);
-            setView('schedule-detail');
-            return;
-        }
-
-        setSchedules((prev) => [...prev, { ...data, id: Math.random().toString() }]);
-        closeOverlayToCalendar();
-    };
-
-    const handleSaveTodo = (data: Omit<Todo, 'id' | 'completed' | 'createdAt'>) => {
-        if (editingTodo) {
-            const updated = { ...editingTodo, ...data };
-            setTodos((prev) => prev.map((todo) => todo.id === editingTodo.id ? updated : todo));
-            setEditingTodo(updated);
-            setView('todo-detail');
-            return;
-        }
-
-        setTodos((prev) => [...prev, {
-            ...data,
-            id: Math.random().toString(),
-            completed: false,
-            createdAt: new Date().toISOString(),
-        }]);
-        closeOverlayToCalendar();
-    };
-
-    const handleRegisterCancel = () => {
-        closeOverlayToCalendar();
-    };
-
     const handleDateClick = (date: Date) => {
         const matchSchedules = getSchedulesForDate(date);
         const matchTodos = getTodosForDate(date);
@@ -176,59 +78,38 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
-        setEditingSchedule(null);
-        setEditingTodo(null);
-        setRegisterInitialTab('schedule');
-        setView('register');
+        navigate('/calendar/write');
     };
 
     const handleEventClick = (schedule: Schedule) => {
-        setEditingSchedule(schedule);
-        setView('schedule-detail');
+        navigate(`/calendar/${schedule.id}`);
     };
 
     const handleTodoClick = (todo: Todo) => {
-        setEditingTodo(todo);
-        setView('todo-detail');
+        navigate(`/calendar/todo/${todo.id}`);
     };
 
     const handleDayScheduleSelect = (schedule: Schedule) => {
-        setEditingSchedule(schedule);
         setIsDayScheduleModalOpen(false);
-        setView('schedule-detail');
+        navigate(`/calendar/${schedule.id}`);
     };
 
     const handleDayTodoSelect = (todo: Todo) => {
-        setEditingTodo(todo);
         setIsDayScheduleModalOpen(false);
-        setView('todo-detail');
+        navigate(`/calendar/todo/${todo.id}`);
     };
 
     const handleCreateFromDay = (tab: 'schedule' | 'todo') => {
-        setEditingSchedule(null);
-        setEditingTodo(null);
-        setRegisterInitialTab(tab);
         setIsDayScheduleModalOpen(false);
-        setView('register');
+        if (tab === 'schedule') {
+            navigate('/calendar/write');
+            return;
+        }
+        navigate('/calendar/todo/write');
     };
 
     useEffect(() => {
-        if (view !== 'calendar' && !overlayHistoryRef.current) {
-            window.history.pushState({ calendarOverlay: true }, '');
-            overlayHistoryRef.current = true;
-        }
-    }, [view]);
-
-    useEffect(() => {
         const handlePopState = () => {
-            if (view !== 'calendar') {
-                overlayHistoryRef.current = false;
-                setEditingSchedule(null);
-                setEditingTodo(null);
-                setView('calendar');
-                return;
-            }
-
             if (isSidebarOpen) {
                 setSidebarOpen(false);
                 sidebarHistoryRef.current = false;
@@ -242,7 +123,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
-    }, [isDayScheduleModalOpen, isSidebarOpen, view]);
+    }, [isDayScheduleModalOpen, isSidebarOpen]);
 
     const handleSwipe = (dir: 'prev' | 'next') => {
         const nextDate = new Date(currentDate);
@@ -336,7 +217,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0f172a] transition-colors">
             <UniversalHeader title="캘린더" onBack={onBack} showBack={false} onMenuClick={openSidebar} />
 
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+            <div className="flex flex-1 overflow-hidden h-screen pt-16">
                 <CalendarSidebar
                     calendars={calendars}
                     onToggleVisibility={toggleCalendarVisibility}
@@ -471,11 +352,8 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </h3>
                                 <button
                                     onClick={() => {
-                                        setEditingTodo(null);
-                                        setEditingSchedule(null);
                                         setSelectedDate(new Date());
-                                        setRegisterInitialTab('todo');
-                                        setView('register');
+                                        navigate('/calendar/todo/write');
                                     }}
                                     className="p-1.5 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-full text-slate-400 hover:text-violet-500 transition-colors"
                                 >
@@ -535,50 +413,6 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             <AnimatePresence>
-                {view !== 'calendar' && (
-                    <motion.div
-                        key={view}
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
-                        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-                        className="fixed inset-0 z-[60] bg-slate-50 dark:bg-[#0f172a] flex flex-col"
-                    >
-                        {view === 'register' && (
-                            <RegisterPage
-                                selectedDate={selectedDate || new Date()}
-                                editingSchedule={editingSchedule}
-                                editingTodo={editingTodo}
-                                calendars={calendars}
-                                initialTab={registerInitialTab}
-                                onCancel={handleRegisterCancel}
-                                onSaveSchedule={handleSaveSchedule}
-                                onSaveTodo={handleSaveTodo}
-                            />
-                        )}
-                        {view === 'schedule-detail' && editingSchedule && (
-                            <ScheduleDetailPage
-                                schedule={editingSchedule}
-                                calendars={calendars}
-                                onBack={closeOverlayToCalendar}
-                                onEdit={() => setView('register')}
-                                onDelete={handleDeleteSchedule}
-                            />
-                        )}
-                        {view === 'todo-detail' && editingTodo && (
-                            <TodoDetailPage
-                                todo={editingTodo}
-                                onBack={closeOverlayToCalendar}
-                                onEdit={() => setView('register')}
-                                onDelete={handleDeleteTodo}
-                                onToggleComplete={handleToggleTodoComplete}
-                            />
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <AnimatePresence>
                 {isDayScheduleModalOpen && selectedDate && (
                     <DayScheduleModal
                         date={selectedDate}
@@ -588,7 +422,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         onClose={() => setIsDayScheduleModalOpen(false)}
                         onSelectSchedule={handleDayScheduleSelect}
                         onSelectTodo={handleDayTodoSelect}
-                        onToggleTodo={handleToggleTodoComplete}
+                        onToggleTodo={toggleTodoComplete}
                         onCreateSchedule={() => handleCreateFromDay('schedule')}
                         onCreateTodo={() => handleCreateFromDay('todo')}
                     />
@@ -604,20 +438,15 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 )}
             </AnimatePresence>
 
-            {view === 'calendar' && (
-                <ScrollAwareFab
-                    onClick={() => {
-                        setEditingSchedule(null);
-                        setEditingTodo(null);
-                        setSelectedDate(new Date());
-                        setRegisterInitialTab('schedule');
-                        setView('register');
-                    }}
-                    ariaLabel="일정 추가"
-                >
-                    <Plus size={28} />
-                </ScrollAwareFab>
-            )}
+            <ScrollAwareFab
+                onClick={() => {
+                    setSelectedDate(new Date());
+                    navigate('/calendar/write');
+                }}
+                ariaLabel="일정 추가"
+            >
+                <Plus size={28} />
+            </ScrollAwareFab>
 
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

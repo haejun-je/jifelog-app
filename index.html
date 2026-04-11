@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>JifeLog - 삶의 여정을 기록하다</title>
   <meta name="theme-color" content="#14b8a6">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -32,7 +32,16 @@
     }
   </script>
   <style>
+    html {
+      width: 100%;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
     body {
+      width: 100%;
+      overflow-x: hidden;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
       -webkit-tap-highlight-color: transparent;
       transition: background-color 0.3s ease, color 0.3s ease;
@@ -85,6 +94,7 @@
       scrollbar-width: none;
       /* Firefox */
     }
+
   </style>
   <script type="importmap">
 {

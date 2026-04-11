@@ -93,7 +93,7 @@ export interface DriveFile {
 
 // 일기 관련 타입
 export type EmotionKey = 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'anxious' | 'tired';
-export type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'windy';
+export type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'hail' | 'windy';
 
 export interface Diary {
   id: string;
@@ -101,6 +101,7 @@ export interface Diary {
   emotion: EmotionKey | null;
   weather: WeatherKey | null;
   content: string;
+  energy: number | null;  // 1~5
   satisfaction: number | null;  // 1~5
   keywords: string[];
   goodThings: string[];
@@ -114,6 +115,7 @@ export interface DiaryFormState {
   emotion: EmotionKey | null;
   weather: WeatherKey | null;
   content: string;
+  energy: number | null;
   satisfaction: number | null;
   keywords: string[];
   goodThings: string[];
@@ -125,6 +127,7 @@ export interface DiaryCreateRequest {
   emotion: EmotionKey | null;
   weather: WeatherKey | null;
   content: string;
+  energy: number | null;
   satisfaction: number | null;
   keywords: string[];
   goodThings: string[];
@@ -136,6 +139,7 @@ export interface DiaryUpdateRequest {
   emotion?: EmotionKey | null;
   weather?: WeatherKey | null;
   content?: string;
+  energy?: number | null;
   satisfaction?: number | null;
   keywords?: string[];
   goodThings?: string[];

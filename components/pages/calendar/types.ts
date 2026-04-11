@@ -1,4 +1,4 @@
-export type AppView = 'calendar' | 'register' | 'schedule-detail' | 'todo-detail';
+export type AppView = 'calendar';
 
 export interface Schedule {
     id: string;

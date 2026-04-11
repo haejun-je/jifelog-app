@@ -37,7 +37,7 @@ const DiaryListPage: React.FC = () => {
       />
 
       <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full">
-        <div className="max-w-3xl mx-auto px-4 md:px-5 py-5 md:py-6 pb-24">
+        <div className="max-w-3xl mx-auto px-4 md:px-5 pt-[calc(4rem+1.25rem)] md:pt-[calc(4rem+1.5rem)] pb-24">
           {isLoading && (
             <div className="flex justify-center py-16">
               <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />

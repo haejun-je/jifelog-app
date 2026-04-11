@@ -516,7 +516,7 @@ const FeedPageV2: React.FC = () => {
         }
       />
 
-      <main data-fab-scroll-container className="flex-1 overflow-y-auto no-scrollbar">
+      <main data-fab-scroll-container className="flex-1 overflow-y-auto no-scrollbar pt-16">
         <div className="max-w-2xl mx-auto px-4 py-5 pb-28 space-y-5">
 
           {/* ── Summary Section ── */}

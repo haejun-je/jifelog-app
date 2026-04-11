@@ -9,12 +9,12 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
+        <div className="flex min-h-screen overflow-x-hidden bg-slate-50 dark:bg-slate-900 transition-colors">
             {/* Desktop Left LNB */}
             <GlobalSidebar />
 
             {/* Main View Area */}
-            <div className="flex-1 flex flex-col md:pl-16 relative">
+            <div className="relative flex min-w-0 flex-1 flex-col overflow-x-hidden md:pl-16">
                 {children}
             </div>
 

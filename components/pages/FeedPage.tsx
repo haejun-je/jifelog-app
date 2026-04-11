@@ -363,7 +363,7 @@ const FeedPage: React.FC<FeedPageProps> = ({ currentUserId = 'user1' }) => {
         }
       />
       
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+      <div className="flex flex-1 overflow-hidden h-screen pt-16">
         <FeedSideMenu isOpen={isMenuOpen} onClose={closeMenu} />
         
         <main data-fab-scroll-container className="flex-1 overflow-y-auto w-full relative">

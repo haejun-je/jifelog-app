@@ -42,7 +42,7 @@ const KeywordPicker: React.FC<KeywordPickerProps> = ({ value, onChange }) => {
   return (
     <div className="space-y-3">
       {/* 프리셋 */}
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
         {PRESET_KEYWORDS.map((keyword) => {
           const selected = value.includes(keyword);
           const disabled = !selected && value.length >= MAX_KEYWORDS;
@@ -52,7 +52,7 @@ const KeywordPicker: React.FC<KeywordPickerProps> = ({ value, onChange }) => {
               type="button"
               onClick={() => toggle(keyword)}
               disabled={disabled}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`min-w-0 rounded-full px-1.5 py-1.5 text-center text-xs sm:text-sm font-medium transition-colors ${
                 selected
                   ? 'bg-teal-500 text-white'
                   : disabled
@@ -91,7 +91,7 @@ const KeywordPicker: React.FC<KeywordPickerProps> = ({ value, onChange }) => {
       )}
 
       {/* 직접 입력 */}
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
           value={input}
@@ -105,7 +105,7 @@ const KeywordPicker: React.FC<KeywordPickerProps> = ({ value, onChange }) => {
           type="button"
           onClick={addCustom}
           disabled={!input.trim() || value.length >= MAX_KEYWORDS}
-          className="px-4 py-2 rounded-xl bg-teal-500 text-white text-sm font-semibold disabled:opacity-40 hover:bg-teal-600 transition-colors"
+          className="w-full rounded-xl bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-600 disabled:opacity-40 sm:w-auto"
         >
           추가
         </button>

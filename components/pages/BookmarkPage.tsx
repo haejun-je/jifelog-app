@@ -119,7 +119,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 onMenuClick={openSidebar}
             />
 
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+            <div className="flex flex-1 overflow-hidden h-screen pt-16">
                 <BookmarkSidebar
                     folders={folders}
                     selectedFolderId={selectedFolderId}

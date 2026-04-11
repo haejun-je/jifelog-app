@@ -5,6 +5,7 @@ import { useDiaryForm } from '../../hooks/useDiaryForm';
 import { getDiaryById } from '../../api/diaryMock';
 import EmotionPicker from '../diary/EmotionPicker';
 import WeatherPicker from '../diary/WeatherPicker';
+import EnergySlider from '../diary/EnergySlider';
 import SatisfactionSlider from '../diary/SatisfactionSlider';
 import KeywordPicker from '../diary/KeywordPicker';
 import ReflectionInput from '../diary/ReflectionInput';
@@ -21,6 +22,7 @@ const DiaryEditPage: React.FC = () => {
     emotion, setEmotion,
     weather, setWeather,
     content, setContent,
+    energy, setEnergy,
     satisfaction, setSatisfaction,
     keywords, setKeywords,
     goodThings, setGoodThings,
@@ -40,6 +42,7 @@ const DiaryEditPage: React.FC = () => {
           emotion: diary.emotion,
           weather: diary.weather,
           content: diary.content,
+          energy: diary.energy,
           satisfaction: diary.satisfaction,
           keywords: diary.keywords,
           goodThings: diary.goodThings,
@@ -64,8 +67,8 @@ const DiaryEditPage: React.FC = () => {
         showBack={true}
       />
 
-      <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom)+1.5rem)] md:pb-10">
-        <div className="max-w-2xl mx-auto px-4 md:px-5 md:py-6">
+      <main className="flex-1 overflow-y-auto pt-16 pb-[calc(4rem+env(safe-area-inset-bottom)+1.5rem)]">
+        <div className="mx-auto w-full max-w-2xl px-4 py-5 md:px-5 md:py-6">
           {isLoadingDiary && (
             <div className="flex justify-center py-16">
               <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
@@ -109,7 +112,15 @@ const DiaryEditPage: React.FC = () => {
                 <EmotionPicker value={emotion} onChange={setEmotion} />
               </section>
 
-              {/* 2. 만족도 */}
+              {/* 2. 에너지 */}
+              <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
+                <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
+                  에너지
+                </label>
+                <EnergySlider value={energy} onChange={setEnergy} />
+              </section>
+
+              {/* 3. 만족도 */}
               <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
                   하루 만족도
@@ -117,7 +128,7 @@ const DiaryEditPage: React.FC = () => {
                 <SatisfactionSlider value={satisfaction} onChange={setSatisfaction} />
               </section>
 
-              {/* 3. 날씨 */}
+              {/* 4. 날씨 */}
               <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
                   오늘의 날씨
@@ -125,7 +136,7 @@ const DiaryEditPage: React.FC = () => {
                 <WeatherPicker value={weather} onChange={setWeather} />
               </section>
 
-              {/* 4. 키워드 */}
+              {/* 5. 키워드 */}
               <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
                   오늘의 키워드
@@ -133,7 +144,7 @@ const DiaryEditPage: React.FC = () => {
                 <KeywordPicker value={keywords} onChange={setKeywords} />
               </section>
 
-              {/* 5. 회고 */}
+              {/* 6. 회고 */}
               <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-4">
                   오늘의 회고
@@ -146,7 +157,7 @@ const DiaryEditPage: React.FC = () => {
                 />
               </section>
 
-              {/* 6. 일기 본문 */}
+              {/* 7. 일기 본문 */}
               <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
                   오늘 하루

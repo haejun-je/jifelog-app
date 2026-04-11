@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster, ToastBar } from 'react-hot-toast';
 import Header from './components/marketing/Header';
 import Hero from './components/marketing/Hero';
@@ -22,8 +23,25 @@ import DiaryListPage from './components/pages/DiaryListPage';
 import DiaryWritePage from './components/pages/DiaryWritePage';
 import DiaryDetailPage from './components/pages/DiaryDetailPage';
 import DiaryEditPage from './components/pages/DiaryEditPage';
+import { CalendarProvider } from './components/pages/calendar/CalendarContext';
+import CalendarScheduleFormRoute from './components/pages/calendar/CalendarScheduleFormRoute';
+import CalendarScheduleDetailRoute from './components/pages/calendar/CalendarScheduleDetailRoute';
+import CalendarTodoFormRoute from './components/pages/calendar/CalendarTodoFormRoute';
+import CalendarTodoDetailRoute from './components/pages/calendar/CalendarTodoDetailRoute';
 
 import MainLayout from './components/layout/MainLayout';
+
+const SlideOverlayRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <motion.div
+    initial={{ x: '100%' }}
+    animate={{ x: 0 }}
+    exit={{ x: '100%' }}
+    transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+    className="fixed inset-0 z-[60] flex flex-col bg-slate-50 dark:bg-[#0f172a]"
+  >
+    {children}
+  </motion.div>
+);
 
 const HomePage: React.FC<{
   onLogin: () => void;
@@ -85,6 +103,7 @@ const HomePage: React.FC<{
 const App: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -198,24 +217,34 @@ const App: React.FC = () => {
           }
         `}
       </style>
-      <Routes>
-        <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} navigateToFeed={navigateToFeed} />} />
-        <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
-        <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/calendar" element={<MainLayout><CalendarPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/feed" element={<MainLayout><FeedPageV2 /></MainLayout>} />
-        <Route path="/feed-v2" element={<MainLayout><FeedPageV2 /></MainLayout>} />
-        <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
-        <Route path="/diary/write" element={<MainLayout><DiaryWritePage /></MainLayout>} />
-        <Route path="/diary/:id/edit" element={<MainLayout><DiaryEditPage /></MainLayout>} />
-        <Route path="/diary/:id" element={<MainLayout><DiaryDetailPage /></MainLayout>} />
-        <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} navigateToFeed={navigateToFeed} />} />
+          <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
+          <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
+          <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
+          <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
+          <Route path="/calendar" element={<MainLayout><CalendarProvider><Outlet /></CalendarProvider></MainLayout>}>
+            <Route index element={<CalendarPage onBack={navigateToDrive} />} />
+            <Route path="write" element={<SlideOverlayRoute><CalendarScheduleFormRoute mode="create" /></SlideOverlayRoute>} />
+            <Route path=":id/edit" element={<SlideOverlayRoute><CalendarScheduleFormRoute mode="edit" /></SlideOverlayRoute>} />
+            <Route path=":id" element={<SlideOverlayRoute><CalendarScheduleDetailRoute /></SlideOverlayRoute>} />
+            <Route path="todo/write" element={<SlideOverlayRoute><CalendarTodoFormRoute mode="create" /></SlideOverlayRoute>} />
+            <Route path="todo/:id/edit" element={<SlideOverlayRoute><CalendarTodoFormRoute mode="edit" /></SlideOverlayRoute>} />
+            <Route path="todo/:id" element={<SlideOverlayRoute><CalendarTodoDetailRoute /></SlideOverlayRoute>} />
+          </Route>
+          <Route path="/feed" element={<MainLayout><FeedPageV2 /></MainLayout>} />
+          <Route path="/feed-v2" element={<MainLayout><FeedPageV2 /></MainLayout>} />
+          <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
+          <Route path="/diary/write" element={<MainLayout><SlideOverlayRoute><DiaryWritePage /></SlideOverlayRoute></MainLayout>} />
+          <Route path="/diary/:id/edit" element={<MainLayout><SlideOverlayRoute><DiaryEditPage /></SlideOverlayRoute></MainLayout>} />
+          <Route path="/diary/:id" element={<MainLayout><SlideOverlayRoute><DiaryDetailPage /></SlideOverlayRoute></MainLayout>} />
+          <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
 
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </AnimatePresence>
     </div>
   );
 };
