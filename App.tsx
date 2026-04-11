@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Toaster, ToastBar } from 'react-hot-toast';
 import Header from './components/marketing/Header';
 import Hero from './components/marketing/Hero';
 import FeatureShowcase from './components/marketing/FeatureShowcase';
@@ -145,6 +146,58 @@ const App: React.FC = () => {
   return (
 
     <div className="min-h-screen transition-colors duration-300">
+      <Toaster
+        position="top-center"
+        containerStyle={{
+          top: '80vh',
+        }}
+        toastOptions={{
+          duration: 1000,
+          style: {
+            borderRadius: '16px',
+            background: '#0f172a',
+            color: '#f8fafc',
+            fontSize: '14px',
+            fontWeight: 700,
+            padding: '12px 16px',
+          },
+        }}
+      >
+        {(t) => (
+          <ToastBar
+            toast={t}
+            style={{
+              ...t.style,
+              animation: t.visible
+                ? 'toast-slide-up 220ms cubic-bezier(0.22, 1, 0.36, 1)'
+                : 'toast-fade-out 180ms ease-in forwards',
+            }}
+          />
+        )}
+      </Toaster>
+      <style>
+        {`
+          @keyframes toast-slide-up {
+            from {
+              opacity: 0;
+              transform: translateY(14px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          @keyframes toast-fade-out {
+            from {
+              opacity: 1;
+            }
+            to {
+              opacity: 0;
+            }
+          }
+        `}
+      </style>
       <Routes>
         <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} navigateToFeed={navigateToFeed} />} />
         <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
