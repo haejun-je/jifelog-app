@@ -18,8 +18,8 @@ import LoginPage from './components/pages/LoginPage';
 import NodesPage from './components/pages/NodesPage';
 import CalendarPage from './components/pages/CalendarPage';
 import FeedPage from './components/pages/FeedPage';
-import FeedPageV2 from './components/pages/FeedPageV2';
 import DiaryListPage from './components/pages/DiaryListPage';
+import AIChatPage from './components/pages/AIChatPage';
 import { CalendarProvider } from './components/pages/calendar/CalendarContext';
 
 import MainLayout from './components/layout/MainLayout';
@@ -218,9 +218,9 @@ const App: React.FC = () => {
           <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
           <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
           <Route path="/calendar" element={<MainLayout><CalendarProvider><CalendarPage onBack={navigateToDrive} /></CalendarProvider></MainLayout>} />
-          <Route path="/feed" element={<MainLayout><FeedPageV2 /></MainLayout>} />
-          <Route path="/feed-v2" element={<MainLayout><FeedPageV2 /></MainLayout>} />
+          <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
           <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
+          <Route path="/ai" element={<MainLayout><AIChatPage /></MainLayout>} />
           <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
 
           <Route path="/signup" element={<SignupPage />} />
