@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useDiaryForm } from '../../hooks/useDiaryForm';
 import EmotionPicker from '../diary/EmotionPicker';
@@ -10,8 +9,12 @@ import KeywordPicker from '../diary/KeywordPicker';
 import ReflectionInput from '../diary/ReflectionInput';
 import UniversalHeader from '../layout/UniversalHeader';
 
-const DiaryWritePage: React.FC = () => {
-  const navigate = useNavigate();
+interface DiaryWritePageProps {
+  onBack: () => void;
+  onSaved: () => void;
+}
+
+const DiaryWritePage: React.FC<DiaryWritePageProps> = ({ onBack, onSaved }) => {
   const {
     date, setDate,
     emotion, setEmotion,
@@ -24,13 +27,13 @@ const DiaryWritePage: React.FC = () => {
     badThings, setBadThings,
     isSubmitting, submitError, canSubmit,
     handleCreate,
-  } = useDiaryForm();
+  } = useDiaryForm({ onCreateSuccess: onSaved });
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-slate-50 transition-colors dark:bg-[#0f172a]">
       <UniversalHeader
         title="일기 쓰기"
-        onBack={() => navigate('/diary')}
+        onBack={onBack}
         showBack={true}
       />
 

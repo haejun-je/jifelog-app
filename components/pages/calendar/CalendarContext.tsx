@@ -3,6 +3,13 @@ import type { CalendarCategory } from '../../calendar/CalendarSidebar';
 import type { Schedule, Todo } from './types';
 import { toLocalDateStr } from './utils';
 
+export type PanelState =
+    | { type: 'none' }
+    | { type: 'schedule-detail'; id: string }
+    | { type: 'schedule-form'; id?: string }
+    | { type: 'todo-detail'; id: string }
+    | { type: 'todo-form'; id?: string };
+
 interface CalendarContextValue {
     calendars: CalendarCategory[];
     schedules: Schedule[];
@@ -23,6 +30,9 @@ interface CalendarContextValue {
     saveTodo: (data: Omit<Todo, 'id' | 'completed' | 'createdAt'>, id?: string) => Todo;
     deleteTodo: (id: string) => void;
     toggleTodoComplete: (id: string) => void;
+    activePanel: PanelState;
+    openPanel: (panel: PanelState) => void;
+    closePanel: () => void;
 }
 
 const CalendarContext = createContext<CalendarContextValue | null>(null);
@@ -42,6 +52,16 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ]);
     const [todos, setTodos] = useState<Todo[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [activePanel, setActivePanel] = useState<PanelState>({ type: 'none' });
+
+    const openPanel = (panel: PanelState) => {
+        window.history.pushState({ calendarPanel: true }, '');
+        setActivePanel(panel);
+    };
+
+    const closePanel = () => {
+        setActivePanel({ type: 'none' });
+    };
 
     const toggleCalendarVisibility = (id: string) =>
         setCalendars((prev) => prev.map((calendar) => calendar.id === id ? { ...calendar, isVisible: !calendar.isVisible } : calendar));
@@ -142,6 +162,9 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 saveTodo,
                 deleteTodo,
                 toggleTodoComplete,
+                activePanel,
+                openPanel,
+                closePanel,
             }}
         >
             {children}

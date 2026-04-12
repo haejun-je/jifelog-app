@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { DiaryFormState, EmotionKey, WeatherKey } from '../types';
 import { createDiary, updateDiary } from '../api/diaryMock';
 
-export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
-  const navigate = useNavigate();
+interface UseDiaryFormOptions {
+  initialValues?: Partial<DiaryFormState>;
+  onCreateSuccess?: () => void;
+  onUpdateSuccess?: (id: string) => void;
+}
+
+export function useDiaryForm({ initialValues, onCreateSuccess, onUpdateSuccess }: UseDiaryFormOptions = {}) {
   const today = new Date().toISOString().slice(0, 10);
 
   const [date, setDate] = useState(initialValues?.date ?? today);
@@ -51,7 +55,7 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
         goodThings,
         badThings,
       });
-      navigate('/diary');
+      onCreateSuccess?.();
     } catch (e: unknown) {
       const err = e as Error;
       setSubmitError(err.message ?? '저장에 실패했습니다.');
@@ -76,7 +80,7 @@ export function useDiaryForm(initialValues?: Partial<DiaryFormState>) {
         goodThings,
         badThings,
       });
-      navigate(`/diary/${id}`);
+      onUpdateSuccess?.(id);
     } catch (e: unknown) {
       const err = e as Error;
       setSubmitError(err.message ?? '수정에 실패했습니다.');

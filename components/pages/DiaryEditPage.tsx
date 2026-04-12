@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useDiaryForm } from '../../hooks/useDiaryForm';
 import { getDiaryById } from '../../api/diaryMock';
@@ -11,9 +10,13 @@ import KeywordPicker from '../diary/KeywordPicker';
 import ReflectionInput from '../diary/ReflectionInput';
 import UniversalHeader from '../layout/UniversalHeader';
 
-const DiaryEditPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+interface DiaryEditPageProps {
+  id: string;
+  onBack: () => void;
+  onSaved: (id: string) => void;
+}
+
+const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) => {
   const [isLoadingDiary, setIsLoadingDiary] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -30,13 +33,12 @@ const DiaryEditPage: React.FC = () => {
     isSubmitting, submitError, canSubmit,
     initForm,
     handleUpdate,
-  } = useDiaryForm();
+  } = useDiaryForm({ onUpdateSuccess: onSaved });
 
   useEffect(() => {
-    if (!id) return;
     async function load() {
       try {
-        const diary = await getDiaryById(id!);
+        const diary = await getDiaryById(id);
         initForm({
           date: diary.date,
           emotion: diary.emotion,
@@ -63,7 +65,7 @@ const DiaryEditPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] transition-colors flex flex-col">
       <UniversalHeader
         title="일기 수정"
-        onBack={() => navigate(`/diary/${id}`)}
+        onBack={onBack}
         showBack={true}
       />
 
@@ -179,7 +181,7 @@ const DiaryEditPage: React.FC = () => {
 
               <div className="pt-2">
                 <button
-                  onClick={() => id && handleUpdate(id)}
+                  onClick={() => handleUpdate(id)}
                   disabled={!canSubmit}
                   className={`w-full py-3.5 rounded-xl text-sm font-bold transition-colors ${
                     canSubmit
