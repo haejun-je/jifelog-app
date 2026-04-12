@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Toaster, ToastBar } from 'react-hot-toast';
 import Header from './components/marketing/Header';
 import Hero from './components/marketing/Hero';
 import FeatureShowcase from './components/marketing/FeatureShowcase';
@@ -16,8 +18,23 @@ import LoginPage from './components/pages/LoginPage';
 import NodesPage from './components/pages/NodesPage';
 import CalendarPage from './components/pages/CalendarPage';
 import FeedPage from './components/pages/FeedPage';
+import DiaryListPage from './components/pages/DiaryListPage';
+import AIChatPage from './components/pages/AIChatPage';
+import { CalendarProvider } from './components/pages/calendar/CalendarContext';
 
 import MainLayout from './components/layout/MainLayout';
+
+const SlideOverlayRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <motion.div
+    initial={{ x: '100%' }}
+    animate={{ x: 0 }}
+    exit={{ x: '100%' }}
+    transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+    className="fixed inset-0 z-[60] flex flex-col bg-slate-50 dark:bg-[#0f172a]"
+  >
+    {children}
+  </motion.div>
+);
 
 const HomePage: React.FC<{
   onLogin: () => void;
@@ -79,6 +96,7 @@ const HomePage: React.FC<{
 const App: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -140,19 +158,75 @@ const App: React.FC = () => {
   return (
 
     <div className="min-h-screen transition-colors duration-300">
-      <Routes>
-        <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} navigateToFeed={navigateToFeed} />} />
-        <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
-        <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/calendar" element={<MainLayout><CalendarPage onBack={navigateToDrive} /></MainLayout>} />
-        <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
-        <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
+      <Toaster
+        position="top-center"
+        containerStyle={{
+          top: '80vh',
+        }}
+        toastOptions={{
+          duration: 1000,
+          style: {
+            borderRadius: '16px',
+            background: '#0f172a',
+            color: '#f8fafc',
+            fontSize: '14px',
+            fontWeight: 700,
+            padding: '12px 16px',
+          },
+        }}
+      >
+        {(t) => (
+          <ToastBar
+            toast={t}
+            style={{
+              ...t.style,
+              animation: t.visible
+                ? 'toast-slide-up 220ms cubic-bezier(0.22, 1, 0.36, 1)'
+                : 'toast-fade-out 180ms ease-in forwards',
+            }}
+          />
+        )}
+      </Toaster>
+      <style>
+        {`
+          @keyframes toast-slide-up {
+            from {
+              opacity: 0;
+              transform: translateY(14px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
 
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
+          @keyframes toast-fade-out {
+            from {
+              opacity: 1;
+            }
+            to {
+              opacity: 0;
+            }
+          }
+        `}
+      </style>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} navigateToFeed={navigateToFeed} />} />
+          <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
+          <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
+          <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
+          <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
+          <Route path="/calendar" element={<MainLayout><CalendarProvider><CalendarPage onBack={navigateToDrive} /></CalendarProvider></MainLayout>} />
+          <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
+          <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
+          <Route path="/ai" element={<MainLayout><AIChatPage /></MainLayout>} />
+          <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
+
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </AnimatePresence>
     </div>
   );
 };

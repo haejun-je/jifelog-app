@@ -119,7 +119,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 onMenuClick={openSidebar}
             />
 
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+            <div className="flex flex-1 overflow-hidden h-screen pt-16">
                 <BookmarkSidebar
                     folders={folders}
                     selectedFolderId={selectedFolderId}
@@ -132,7 +132,7 @@ const BookmarkPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     onClose={closeSidebar}
                 />
 
-                <main data-fab-scroll-container className="flex-1 overflow-y-auto relative w-full pb-24 md:ml-64 md:pr-64">
+                <main data-fab-scroll-container className="flex-1 overflow-y-auto relative w-full pb-24">
                     {selectedBookmark ? (
                         <BookmarkDetail
                             bookmark={selectedBookmark}

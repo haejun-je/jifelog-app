@@ -1,19 +1,27 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layout, HardDrive, Calendar, Bookmark, Settings, Bot } from 'lucide-react';
+import { Layout, HardDrive, Calendar, Bot, BookOpen } from 'lucide-react';
 
 const BottomMenu: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const isDiaryFocusPage =
+        location.pathname === '/diary/write' ||
+        /^\/diary\/[^/]+$/.test(location.pathname) ||
+        /^\/diary\/[^/]+\/edit$/.test(location.pathname);
 
     const menuItems = [
         { label: '피드', icon: Layout, path: '/feed' },
         { label: '드라이브', icon: HardDrive, path: '/drive' },
         { label: 'AI 비서', icon: Bot, path: '/ai' },
         { label: '일정', icon: Calendar, path: '/calendar' },
-        { label: '즐겨찾기', icon: Bookmark, path: '/bookmarks' },
+        { label: '일기', icon: BookOpen, path: '/diary' },
     ];
+
+    if (isDiaryFocusPage) {
+        return null;
+    }
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 pb-safe md:hidden">
@@ -34,7 +42,6 @@ const BottomMenu: React.FC = () => {
                             <Icon
                                 size={24}
                                 strokeWidth={isActive ? 2.5 : 2}
-                                fill={isActive && item.label === '즐겨찾기' ? 'currentColor' : 'none'}
                             />
                             <span className="text-[10px] font-bold whitespace-nowrap">{item.label}</span>
                         </button>
