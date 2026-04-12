@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Pencil, Trash2, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { Diary } from '../../types';
@@ -23,9 +22,14 @@ const ENERGY_LABELS: Record<number, string> = {
   5: '매우 높음',
 };
 
-const DiaryDetailPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+interface DiaryDetailPageProps {
+  id: string;
+  onBack: () => void;
+  onEdit: (id: string) => void;
+  onDeleted: () => void;
+}
+
+const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, onDeleted }) => {
   const [diary, setDiary] = useState<Diary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,10 +38,9 @@ const DiaryDetailPage: React.FC = () => {
   const [isActionBarVisible, setIsActionBarVisible] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
     async function load() {
       try {
-        const data = await getDiaryById(id!);
+        const data = await getDiaryById(id);
         setDiary(data);
       } catch (e: unknown) {
         const err = e as Error;
@@ -50,11 +53,10 @@ const DiaryDetailPage: React.FC = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!id) return;
     setIsDeleting(true);
     try {
       await deleteDiary(id);
-      navigate('/diary');
+      onDeleted();
     } catch (e: unknown) {
       const err = e as Error;
       alert(err.message ?? '삭제에 실패했습니다.');
@@ -112,7 +114,7 @@ const DiaryDetailPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] transition-colors flex flex-col">
       <UniversalHeader
         title="일기"
-        onBack={() => navigate('/diary')}
+        onBack={onBack}
         showBack={true}
       />
 
@@ -295,7 +297,7 @@ const DiaryDetailPage: React.FC = () => {
         >
           <div className="mx-auto grid max-w-2xl grid-cols-3 gap-2">
             <button
-              onClick={() => navigate(`/diary/${id}/edit`)}
+              onClick={() => onEdit(id)}
               className="flex flex-col items-center gap-1.5 rounded-2xl bg-slate-100 py-3.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <Pencil size={16} />
@@ -310,7 +312,7 @@ const DiaryDetailPage: React.FC = () => {
               삭제
             </button>
             <button
-              onClick={() => navigate('/diary')}
+              onClick={onBack}
               className="flex flex-col items-center gap-1.5 rounded-2xl bg-slate-100 py-3.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <X size={16} />

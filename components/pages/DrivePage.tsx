@@ -175,7 +175,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                       <ChevronRight size={16} className="mt-1 text-slate-300 dark:text-slate-600 group-hover:text-teal-500 transition-colors" />
                     </div>
                     <div className="mt-4">
-                      <div className="text-sm font-medium text-slate-700 dark:text-slate-200 break-keep">
+                      <div className="text-[13px] font-medium text-slate-700 dark:text-slate-200 break-keep">
                         {cat.label}
                       </div>
                     </div>
@@ -186,62 +186,13 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
 
             {/* Content Lists */}
             <div className="flex-1 space-y-8 mt-8">
-              <section className={`transition-all duration-500 ease-in-out delay-100 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
-                  <div className="px-5 py-5 md:px-6">
-              {/* Recent Files Grid */}
-                    <div>
-                      <div className="flex justify-between items-center mb-4">
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                            <Clock size={14} /> Recent Files
-                          </p>
-                          <h3 className="mt-1 text-base font-semibold text-slate-800 dark:text-white">
-                            최근 파일
-                          </h3>
-                        </div>
-                        <button onClick={onSeeAllRecent} className="h-10 px-3 rounded-xl text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                          <ChevronRight size={20} />
-                        </button>
-                      </div>
-                      <div className="space-y-3">
-                        {recentFiles.slice(0, 4).map((file, i) => (
-                          <button
-                            key={i}
-                            className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/40 px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center border border-slate-200/80 dark:border-white/5">
-                                {getFileIcon(file.type)}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
-                                  {file.name}
-                                </div>
-                                <div className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
-                                  {file.size} • {file.date}
-                                </div>
-                              </div>
-                              <ChevronRight size={18} className="text-slate-300 dark:text-slate-600 group-hover:text-teal-500 transition-colors" />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
               {/* Folders List */}
               <section className={`transition-all duration-500 ease-in-out delay-200 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                 <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
-                  <div className="flex justify-between items-center border-b border-slate-200/80 dark:border-white/5 px-5 py-4 md:px-6">
+                  <div className="flex justify-between items-center border-b border-slate-200/80 dark:border-white/5 px-5 py-1 md:px-6">
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                        <Folder size={14} /> My Drive
-                      </p>
-                      <h3 className="mt-1 text-base font-semibold text-slate-800 dark:text-white">
-                        내 드라이브
+                      <h3 className="text-[13px] font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                        <Folder size={14} className="text-white" /> 내 드라이브
                       </h3>
                     </div>
                     <button onClick={onSeeAllNodes} className="h-10 px-3 rounded-xl text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -257,11 +208,48 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                               <Folder size={24} />
                             </div>
                             <div className="min-w-0">
-                              <div className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1 truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                              <div className="text-[13px] font-medium text-slate-800 dark:text-slate-100 mb-1 truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                                 {folder.name}
                               </div>
-                              <div className="text-[12px] text-slate-500 dark:text-gray-400">
+                              <div className="text-[11px] text-slate-500 dark:text-gray-400">
                                 항목 {folder.items}개 • 마지막 수정 {folder.date}
+                              </div>
+                            </div>
+                          </div>
+                          <button className="p-2 text-slate-400 dark:text-gray-600 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                            <MoreVertical size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className={`transition-all duration-500 ease-in-out delay-100 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <div className="rounded-[28px] border border-slate-200/80 dark:border-white/5 bg-white dark:bg-slate-900 overflow-hidden">
+                  <div className="flex justify-between items-center border-b border-slate-200/80 dark:border-white/5 px-5 py-1 md:px-6">
+                    <h3 className="text-[13px] font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                      <Clock size={14} className="text-white" /> 최근 파일
+                    </h3>
+                    <button onClick={onSeeAllRecent} className="h-10 px-3 rounded-xl text-slate-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5">
+                    {recentFiles.slice(0, 4).map((file, i) => (
+                      <div key={i} className="px-5 py-4 md:px-6 group hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
+                              {getFileIcon(file.type)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[13px] font-medium text-slate-800 dark:text-slate-100 mb-1 truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                {file.name}
+                              </div>
+                              <div className="text-[11px] text-slate-500 dark:text-gray-400">
+                                {file.size} • {file.date}
                               </div>
                             </div>
                           </div>
@@ -281,10 +269,10 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                     <div className="px-5 py-5 md:px-6">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Storage
                           </p>
-                          <h3 className="mt-2 text-lg font-semibold text-slate-800 dark:text-white">
+                          <h3 className="mt-2 text-sm font-semibold text-slate-800 dark:text-white">
                             {storageUsed} GB / {storageTotal} GB
                           </h3>
                         </div>
@@ -294,7 +282,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
                       </div>
 
                       <div className="mt-5">
-                        <div className="flex items-center justify-between text-[11px] font-bold tracking-[0.16em] uppercase text-slate-400 dark:text-slate-500">
+                        <div className="flex items-center justify-between text-[10px] font-medium tracking-[0.16em] uppercase text-slate-400 dark:text-slate-500">
                           <span>Used</span>
                           <span>{storageRatio.toFixed(1)}%</span>
                         </div>
@@ -309,7 +297,7 @@ const DrivePage: React.FC<DrivePageProps> = ({ onBack, onSeeAllRecent, onSeeAllN
 
                     <div className="border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-white/5 px-5 py-5 md:px-6 flex items-center justify-between gap-4 bg-slate-50/70 dark:bg-slate-950/30">
                       <div>
-                        <div className="text-sm font-medium text-slate-800 dark:text-white">휴지통</div>
+                        <div className="text-[13px] font-medium text-slate-800 dark:text-white">휴지통</div>
                         <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">삭제 항목 보기</div>
                       </div>
                       <button className="h-10 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition-opacity">

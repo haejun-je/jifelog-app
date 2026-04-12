@@ -27,7 +27,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
     const SidebarContent = (
         <div className="flex flex-col h-full">
             {/* Header Area */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-slate-200 dark:border-white/5">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h2>
                 <div className="flex items-center gap-2">
                     {headerAction}
@@ -43,7 +43,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
             </div>
 
             {/* Main Nav / Items Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-3">
                 {children}
             </div>
 
@@ -77,7 +77,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
 
                 {/* Drawer */}
                 <aside
-                    className={`absolute ${drawerPositionClass} top-0 bottom-0 w-[80%] max-w-xs bg-white dark:bg-slate-900 p-6 shadow-2xl transition-transform duration-300 ${drawerBorderClass} border-slate-200 dark:border-white/5 ${drawerTranslateClass}`}
+                    className={`absolute ${drawerPositionClass} top-0 bottom-0 w-[80%] max-w-sm bg-white dark:bg-slate-900 p-3 shadow-2xl transition-transform duration-300 ${drawerBorderClass} border-slate-200 dark:border-white/5 ${drawerTranslateClass}`}
                 >
                     {SidebarContent}
                 </aside>

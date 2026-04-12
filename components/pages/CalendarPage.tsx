@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
     Calendar as CalendarIcon,
     Check,
@@ -17,12 +16,14 @@ import UniversalHeader from '../layout/UniversalHeader';
 import AddCalendarModal from './calendar/AddCalendarModal';
 import CustomCalendarView from './calendar/CustomCalendarView';
 import DayScheduleModal from './calendar/DayScheduleModal';
+import RegisterPage from './calendar/RegisterPage';
+import ScheduleDetailPage from './calendar/ScheduleDetailPage';
+import TodoDetailPage from './calendar/TodoDetailPage';
 import type { Schedule, Todo } from './calendar/types';
 import { formatMonthYear } from './calendar/utils';
 import { useCalendarContext } from './calendar/CalendarContext';
 
 const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const navigate = useNavigate();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [isAddCalendarModalOpen, setIsAddCalendarModalOpen] = useState(false);
     const [isDayScheduleModalOpen, setIsDayScheduleModalOpen] = useState(false);
@@ -47,6 +48,15 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         getSchedulesForDate,
         getTodosForDate,
         toggleTodoComplete,
+        findSchedule,
+        findTodo,
+        saveSchedule,
+        saveTodo,
+        deleteSchedule,
+        deleteTodo,
+        activePanel,
+        openPanel,
+        closePanel,
     } = useCalendarContext();
 
     const openSidebar = () => {
@@ -78,38 +88,39 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return;
         }
 
-        navigate('/calendar/write');
+        openPanel({ type: 'schedule-form' });
     };
 
     const handleEventClick = (schedule: Schedule) => {
-        navigate(`/calendar/${schedule.id}`);
+        openPanel({ type: 'schedule-detail', id: schedule.id });
     };
 
     const handleTodoClick = (todo: Todo) => {
-        navigate(`/calendar/todo/${todo.id}`);
+        openPanel({ type: 'todo-detail', id: todo.id });
     };
 
     const handleDayScheduleSelect = (schedule: Schedule) => {
         setIsDayScheduleModalOpen(false);
-        navigate(`/calendar/${schedule.id}`);
+        openPanel({ type: 'schedule-detail', id: schedule.id });
     };
 
     const handleDayTodoSelect = (todo: Todo) => {
         setIsDayScheduleModalOpen(false);
-        navigate(`/calendar/todo/${todo.id}`);
+        openPanel({ type: 'todo-detail', id: todo.id });
     };
 
     const handleCreateFromDay = (tab: 'schedule' | 'todo') => {
         setIsDayScheduleModalOpen(false);
-        if (tab === 'schedule') {
-            navigate('/calendar/write');
-            return;
-        }
-        navigate('/calendar/todo/write');
+        openPanel(tab === 'schedule' ? { type: 'schedule-form' } : { type: 'todo-form' });
     };
 
     useEffect(() => {
         const handlePopState = () => {
+            if (activePanel.type !== 'none') {
+                closePanel();
+                return;
+            }
+
             if (isSidebarOpen) {
                 setSidebarOpen(false);
                 sidebarHistoryRef.current = false;
@@ -123,7 +134,18 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
-    }, [isDayScheduleModalOpen, isSidebarOpen]);
+    }, [activePanel, isDayScheduleModalOpen, isSidebarOpen]);
+
+    useEffect(() => {
+        if (activePanel.type !== 'none') {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [activePanel.type]);
 
     const handleSwipe = (dir: 'prev' | 'next') => {
         const nextDate = new Date(currentDate);
@@ -353,7 +375,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <button
                                     onClick={() => {
                                         setSelectedDate(new Date());
-                                        navigate('/calendar/todo/write');
+                                        openPanel({ type: 'todo-form' });
                                     }}
                                     className="p-1.5 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-full text-slate-400 hover:text-violet-500 transition-colors"
                                 >
@@ -380,7 +402,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                 className={`bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-white/5 transition-all flex items-center gap-3 p-3 ${todo.completed ? 'opacity-60' : ''}`}
                                             >
                                                 <button
-                                                    onClick={() => handleToggleTodoComplete(todo.id)}
+                                                    onClick={() => toggleTodoComplete(todo.id)}
                                                     className={`w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-colors ${todo.completed ? 'bg-violet-500 border-violet-500' : 'border-slate-300 dark:border-slate-600 hover:border-violet-400'}`}
                                                 >
                                                     {todo.completed && <Check size={12} className="text-white" strokeWidth={3} />}
@@ -438,10 +460,98 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 )}
             </AnimatePresence>
 
+            <AnimatePresence>
+                {activePanel.type !== 'none' && (
+                    <motion.div
+                        key={activePanel.type + (('id' in activePanel && activePanel.id) ? `-${activePanel.id}` : '')}
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+                        className="fixed inset-0 z-[60] flex flex-col bg-slate-50 dark:bg-[#0f172a]"
+                    >
+                        {activePanel.type === 'schedule-detail' && (() => {
+                            const schedule = findSchedule(activePanel.id);
+                            if (!schedule) return null;
+                            return (
+                                <ScheduleDetailPage
+                                    schedule={schedule}
+                                    calendars={calendars}
+                                    onBack={closePanel}
+                                    onEdit={() => openPanel({ type: 'schedule-form', id: schedule.id })}
+                                    onDelete={(id) => { deleteSchedule(id); closePanel(); }}
+                                />
+                            );
+                        })()}
+                        {activePanel.type === 'schedule-form' && (
+                            <RegisterPage
+                                selectedDate={(() => {
+                                    if (activePanel.id) {
+                                        const s = findSchedule(activePanel.id);
+                                        return s ? new Date(s.start) : selectedDate || new Date();
+                                    }
+                                    return selectedDate || new Date();
+                                })()}
+                                editingSchedule={activePanel.id ? findSchedule(activePanel.id) : null}
+                                editingTodo={null}
+                                calendars={calendars}
+                                initialTab="schedule"
+                                onCancel={() => {
+                                    if (activePanel.id) {
+                                        openPanel({ type: 'schedule-detail', id: activePanel.id });
+                                    } else {
+                                        closePanel();
+                                    }
+                                }}
+                                onSaveSchedule={(data) => { saveSchedule(data, activePanel.id); closePanel(); }}
+                                onSaveTodo={() => undefined}
+                            />
+                        )}
+                        {activePanel.type === 'todo-detail' && (() => {
+                            const todo = findTodo(activePanel.id);
+                            if (!todo) return null;
+                            return (
+                                <TodoDetailPage
+                                    todo={todo}
+                                    onBack={closePanel}
+                                    onEdit={() => openPanel({ type: 'todo-form', id: todo.id })}
+                                    onDelete={(id) => { deleteTodo(id); closePanel(); }}
+                                    onToggleComplete={toggleTodoComplete}
+                                />
+                            );
+                        })()}
+                        {activePanel.type === 'todo-form' && (
+                            <RegisterPage
+                                selectedDate={(() => {
+                                    if (activePanel.id) {
+                                        const t = findTodo(activePanel.id);
+                                        return t ? new Date(`${t.date}T00:00:00`) : selectedDate || new Date();
+                                    }
+                                    return selectedDate || new Date();
+                                })()}
+                                editingSchedule={null}
+                                editingTodo={activePanel.id ? findTodo(activePanel.id) : null}
+                                calendars={calendars}
+                                initialTab="todo"
+                                onCancel={() => {
+                                    if (activePanel.id) {
+                                        openPanel({ type: 'todo-detail', id: activePanel.id });
+                                    } else {
+                                        closePanel();
+                                    }
+                                }}
+                                onSaveSchedule={() => undefined}
+                                onSaveTodo={(data) => { saveTodo(data, activePanel.id); closePanel(); }}
+                            />
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <ScrollAwareFab
                 onClick={() => {
                     setSelectedDate(new Date());
-                    navigate('/calendar/write');
+                    openPanel({ type: 'schedule-form' });
                 }}
                 ariaLabel="일정 추가"
             >
