@@ -504,7 +504,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     }
                                 }}
                                 onSaveSchedule={(data) => { saveSchedule(data, activePanel.id); closePanel(); }}
-                                onSaveTodo={() => undefined}
+                                onSaveTodo={(data) => { saveTodo(data); closePanel(); }}
                             />
                         )}
                         {activePanel.type === 'todo-detail' && (() => {
@@ -540,7 +540,7 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         closePanel();
                                     }
                                 }}
-                                onSaveSchedule={() => undefined}
+                                onSaveSchedule={(data) => { saveSchedule(data); closePanel(); }}
                                 onSaveTodo={(data) => { saveTodo(data, activePanel.id); closePanel(); }}
                             />
                         )}
