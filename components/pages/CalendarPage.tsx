@@ -4,11 +4,11 @@ import {
     Calendar as CalendarIcon,
     Check,
     CheckSquare,
-    ChevronLeft,
-    ChevronRight,
     Clock,
     MapPin,
     Plus,
+    Search,
+    X,
 } from 'lucide-react';
 import CalendarSidebar, { CalendarCategory } from '../calendar/CalendarSidebar';
 import ScrollAwareFab from '../common/ScrollAwareFab';
@@ -31,9 +31,14 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [dayTodos, setDayTodos] = useState<Todo[]>([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [direction, setDirection] = useState(0);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [pressedHeaderAction, setPressedHeaderAction] = useState<'search' | 'today' | null>(null);
 
     const mainContentRef = useRef<HTMLDivElement>(null);
     const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const headerActionReleaseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const lastHeaderActionRef = useRef<{ action: 'search' | 'today' | null; time: number }>({ action: null, time: 0 });
     const sidebarHistoryRef = useRef(false);
     const [calendarHeight, setCalendarHeight] = useState(window.innerHeight - 192);
     const [scrollRatio, setScrollRatio] = useState(0);
@@ -147,11 +152,51 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         };
     }, [activePanel.type]);
 
+    useEffect(() => {
+        return () => {
+            if (headerActionReleaseTimeout.current) clearTimeout(headerActionReleaseTimeout.current);
+        };
+    }, []);
+
     const handleSwipe = (dir: 'prev' | 'next') => {
         const nextDate = new Date(currentDate);
         nextDate.setMonth(nextDate.getMonth() + (dir === 'next' ? 1 : -1));
         setDirection(dir === 'next' ? 1 : -1);
         setCurrentDate(nextDate);
+    };
+
+    const moveToToday = () => {
+        const now = new Date();
+        if (now.getMonth() === currentDate.getMonth() && now.getFullYear() === currentDate.getFullYear()) return;
+        setDirection(now < currentDate ? -1 : 1);
+        setCurrentDate(now);
+    };
+
+    const pressHeaderAction = (action: 'search' | 'today') => {
+        if (headerActionReleaseTimeout.current) clearTimeout(headerActionReleaseTimeout.current);
+        setPressedHeaderAction(action);
+    };
+
+    const releaseHeaderAction = () => {
+        if (headerActionReleaseTimeout.current) clearTimeout(headerActionReleaseTimeout.current);
+        headerActionReleaseTimeout.current = setTimeout(() => {
+            setPressedHeaderAction(null);
+            headerActionReleaseTimeout.current = null;
+        }, 180);
+    };
+
+    const shouldSkipHeaderClick = (action: 'search' | 'today') => {
+        const now = Date.now();
+        return lastHeaderActionRef.current.action === action && now - lastHeaderActionRef.current.time < 400;
+    };
+
+    const markHeaderActionTriggered = (action: 'search' | 'today') => {
+        lastHeaderActionRef.current = { action, time: Date.now() };
+    };
+
+    const toggleSearch = () => {
+        setIsSearchOpen((prev) => !prev);
+        setSearchQuery('');
     };
 
     const prevMonthDate = useMemo(() => {
@@ -191,6 +236,26 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             return date >= today && date <= endOfWeek;
         }).sort((a, b) => a.date.localeCompare(b.date));
     }, [todos]);
+
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    const filteredWeekSchedules = useMemo(() => {
+        if (!normalizedSearchQuery) return thisWeekSchedules;
+
+        return thisWeekSchedules.filter((schedule) => {
+            const haystack = [schedule.title, schedule.description, schedule.location].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(normalizedSearchQuery);
+        });
+    }, [normalizedSearchQuery, thisWeekSchedules]);
+
+    const filteredWeekTodos = useMemo(() => {
+        if (!normalizedSearchQuery) return thisWeekTodos;
+
+        return thisWeekTodos.filter((todo) => {
+            const haystack = [todo.title, todo.memo, todo.time].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(normalizedSearchQuery);
+        });
+    }, [normalizedSearchQuery, thisWeekTodos]);
 
     useEffect(() => {
         const updateHeight = () => {
@@ -237,7 +302,58 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0f172a] transition-colors">
-            <UniversalHeader title="캘린더" onBack={onBack} showBack={false} onMenuClick={openSidebar} />
+            <UniversalHeader
+                title="캘린더"
+                onBack={onBack}
+                showBack={false}
+                onMenuClick={openSidebar}
+                rightAction={
+                    <>
+                        <button
+                            onPointerDown={() => pressHeaderAction('search')}
+                            onPointerUp={(event) => {
+                                markHeaderActionTriggered('search');
+                                toggleSearch();
+                                event.currentTarget.blur();
+                                releaseHeaderAction();
+                            }}
+                            onPointerCancel={releaseHeaderAction}
+                            onPointerLeave={releaseHeaderAction}
+                            onClick={() => {
+                                if (shouldSkipHeaderClick('search')) return;
+                                toggleSearch();
+                            }}
+                            className={`calendar-header-action p-2 rounded-full text-slate-500 dark:text-gray-400 transition-colors duration-200 ease-out ${pressedHeaderAction === 'search' ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800' : ''}`}
+                            aria-label={isSearchOpen ? '검색 닫기' : '검색'}
+                        >
+                            {isSearchOpen ? <X size={20} /> : <Search size={20} />}
+                        </button>
+                        <button
+                            onPointerDown={() => pressHeaderAction('today')}
+                            onPointerUp={(event) => {
+                                markHeaderActionTriggered('today');
+                                moveToToday();
+                                event.currentTarget.blur();
+                                releaseHeaderAction();
+                            }}
+                            onPointerCancel={releaseHeaderAction}
+                            onPointerLeave={releaseHeaderAction}
+                            onClick={(event) => {
+                                if (shouldSkipHeaderClick('today')) return;
+                                moveToToday();
+                                event.currentTarget.blur();
+                            }}
+                            className={`calendar-header-action p-2 rounded-full text-slate-500 dark:text-gray-400 focus:outline-none focus-visible:outline-none focus-visible:ring-0 transition-colors duration-200 ease-out ${pressedHeaderAction === 'today' ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800' : ''}`}
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            aria-label="오늘로 이동"
+                        >
+                            <div className="w-[20px] h-[20px] border-[2px] border-current rounded-[5px] flex items-center justify-center text-[9px] font-black leading-none pt-px">
+                                {new Date().getDate()}
+                            </div>
+                        </button>
+                    </>
+                }
+            />
 
             <div className="flex flex-1 overflow-hidden h-screen pt-16">
                 <CalendarSidebar
@@ -253,6 +369,39 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     data-fab-scroll-container
                     className="flex-1 overflow-y-auto w-full relative custom-scrollbar"
                 >
+                    <AnimatePresence initial={false}>
+                        {isSearchOpen && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                className="sticky top-0 z-30 overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5"
+                            >
+                                <div className="px-6 py-3 flex items-center gap-2">
+                                    <Search size={16} className="text-slate-400 flex-shrink-0" />
+                                    <input
+                                        autoFocus
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(event) => setSearchQuery(event.target.value)}
+                                        placeholder="일정, 할 일 검색"
+                                        className="flex-1 bg-transparent text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
+                                    />
+                                    {searchQuery && (
+                                        <button
+                                            onClick={() => setSearchQuery('')}
+                                            className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                                            aria-label="검색어 지우기"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <motion.div
                         className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/5 overflow-hidden flex flex-col"
                         animate={{ height: calendarHeight }}
@@ -262,27 +411,6 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <h2 className="text-lg font-black tracking-tight text-slate-800 dark:text-slate-200">
                                 {formatMonthYear(currentDate)}
                             </h2>
-                            <div className="flex items-center gap-1">
-                                <button onClick={() => handleSwipe('prev')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-teal-500 transition-colors">
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        const now = new Date();
-                                        if (now.getMonth() === currentDate.getMonth() && now.getFullYear() === currentDate.getFullYear()) return;
-                                        setDirection(now < currentDate ? -1 : 1);
-                                        setCurrentDate(now);
-                                    }}
-                                    className="p-1.5 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 rounded-full transition-colors flex items-center justify-center"
-                                >
-                                    <div className="w-[19px] h-[19px] border-[2px] border-current rounded-[4px] flex items-center justify-center text-[9px] font-black mt-0.5">
-                                        {new Date().getDate()}
-                                    </div>
-                                </button>
-                                <button onClick={() => handleSwipe('next')} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-teal-500 transition-colors">
-                                    <ChevronRight size={20} />
-                                </button>
-                            </div>
                         </div>
 
                         <div className="flex-1 overflow-hidden relative" style={{ opacity: 1 - scrollRatio * 0.3, transform: `scale(${1 - scrollRatio * 0.02})`, transformOrigin: 'top center' }}>
@@ -319,14 +447,14 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <span className="w-1 h-5 bg-teal-500 rounded-full" />
                                 다가오는 일정
                             </h3>
-                            {thisWeekSchedules.length === 0 ? (
+                            {filteredWeekSchedules.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-slate-300 dark:text-slate-600">
                                     <CalendarIcon size={28} className="mb-3" />
-                                    <p className="text-sm font-semibold">일정이 없습니다</p>
+                                    <p className="text-sm font-semibold">{normalizedSearchQuery ? '검색 결과가 없습니다' : '일정이 없습니다'}</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    {thisWeekSchedules.map((schedule) => {
+                                    {filteredWeekSchedules.map((schedule) => {
                                         const calendar = calendars.find((item) => item.id === schedule.calendarId);
                                         const start = new Date(schedule.start);
                                         const isToday = start.toDateString() === new Date().toDateString();
@@ -382,14 +510,14 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <Plus size={16} />
                                 </button>
                             </div>
-                            {thisWeekTodos.length === 0 ? (
+                            {filteredWeekTodos.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-slate-300 dark:text-slate-600">
                                     <CheckSquare size={28} className="mb-3" />
-                                    <p className="text-sm font-semibold">할 일이 없습니다</p>
+                                    <p className="text-sm font-semibold">{normalizedSearchQuery ? '검색 결과가 없습니다' : '할 일이 없습니다'}</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    {thisWeekTodos.map((todo) => {
+                                    {filteredWeekTodos.map((todo) => {
                                         const todoDate = new Date(todo.date + 'T00:00:00');
                                         const isToday = todoDate.toDateString() === new Date().toDateString();
 
@@ -559,6 +687,23 @@ const CalendarPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </ScrollAwareFab>
 
             <style>{`
+                .calendar-header-action {
+                    -webkit-tap-highlight-color: transparent;
+                    touch-action: manipulation;
+                }
+
+                @media (hover: hover) and (pointer: fine) {
+                    .calendar-header-action:hover {
+                        color: rgb(15 23 42);
+                        background: rgb(241 245 249);
+                    }
+
+                    .dark .calendar-header-action:hover {
+                        color: rgb(255 255 255);
+                        background: rgb(30 41 59);
+                    }
+                }
+
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
                 .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
