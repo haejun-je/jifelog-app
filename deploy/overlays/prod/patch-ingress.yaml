@@ -9,6 +9,7 @@ spec:
   tls:
     - hosts:
         - jifelog.com
+        - www.jifelog.com
       secretName: tls-secret-prod
   rules:
     - host: jifelog.com
