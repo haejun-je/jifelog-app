@@ -1,6 +1,6 @@
 import { env } from '../config/env';
 
-const AUTH_API_PREFIX = '/auth';
+const AUTH_API_PREFIX = '/auth/v1';
 
 export interface ApiErrorData {
   error_code: string;
@@ -53,11 +53,11 @@ async function fetchAuth(path: string, init?: RequestInit): Promise<Response> {
   return res;
 }
 
-export async function login(email: string, password: string): Promise<void> {
+export async function login(login_id: string, password: string): Promise<void> {
   await fetchAuth('/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ login_id, password }),
   });
 }
 
@@ -78,13 +78,13 @@ export async function verifyEmailCode(email: string, token: string): Promise<voi
 
 export async function signup(
   email: string,
-  username: string,
+  nickname: string,
   password: string,
 ): Promise<SignupResponseData> {
   const res = await fetchAuth('/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, username, password }),
+    body: JSON.stringify({ email, nickname, password }),
   });
 
   const body: { data: SignupResponseData } = await res.json();

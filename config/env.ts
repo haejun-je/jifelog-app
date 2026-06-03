@@ -3,7 +3,7 @@ type Profile = 'dev' | 'prod';
 const profile = import.meta.env.MODE as Profile;
 
 const hostMap: Record<Profile, string> = {
-  dev: 'http://dev-gateway.jifelog.com',
+  dev: 'https://dev-gateway.jifelog.com',
   prod: 'https://gateway.jifelog.com',
 };
 
