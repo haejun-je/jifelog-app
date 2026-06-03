@@ -77,14 +77,14 @@ export async function verifyEmailCode(email: string, token: string): Promise<voi
 }
 
 export async function signup(
-  email: string,
-  username: string,
-  password: string,
+    email: string,
+    nickname: string,
+    password: string,
 ): Promise<SignupResponseData> {
   const res = await fetchAuth('/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, username, password }),
+    body: JSON.stringify({ email, username: nickname, password }),
   });
 
   const body: { data: SignupResponseData } = await res.json();
