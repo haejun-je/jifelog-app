@@ -1,6 +1,6 @@
 import { env } from '../config/env';
 
-const AUTH_API_PREFIX = '/auth';
+const AUTH_API_PREFIX = '/auth/v1';
 
 export interface ApiErrorData {
   error_code: string;
