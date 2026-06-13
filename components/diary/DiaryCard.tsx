@@ -68,13 +68,40 @@ const DiaryCard: React.FC<DiaryCardProps> = ({ diary, onClick, index = 0 }) => {
         </div>
       </div>
 
-      {diary.content ? (
-        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200 line-clamp-2">
-          {diary.content}
-        </p>
-      ) : (
-        <p className="text-sm text-slate-400 dark:text-slate-500 italic">내용 없음</p>
-      )}
+      <div className="flex gap-3">
+        {diary.images.length === 1 && (
+          <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden">
+            <img src={diary.images[0]} alt="" className="w-full h-full object-cover" />
+          </div>
+        )}
+        {diary.images.length === 2 && (
+          <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden flex">
+            <img
+              src={diary.images[0]}
+              alt=""
+              className="w-7 h-14 object-cover border-r border-slate-200 dark:border-slate-600"
+            />
+            <img src={diary.images[1]} alt="" className="w-7 h-14 object-cover" />
+          </div>
+        )}
+        {diary.images.length >= 3 && (
+          <div className="relative flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden">
+            <img src={diary.images[0]} alt="" className="w-full h-full object-cover" />
+            <span className="absolute bottom-0 right-0 bg-black/60 text-white text-[10px] font-bold px-1 leading-4 rounded-tl-md">
+              +{diary.images.length - 1}
+            </span>
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          {diary.content ? (
+            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200 line-clamp-2">
+              {diary.content}
+            </p>
+          ) : (
+            <p className="text-sm text-slate-400 dark:text-slate-500 italic">내용 없음</p>
+          )}
+        </div>
+      </div>
 
       {diary.keywords.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">

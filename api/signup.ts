@@ -6,8 +6,6 @@ export {
   verifyEmailCode,
 } from './auth';
 
-export type {
-  ApiErrorData,
-  ApiErrorResponse,
-  SignupResponseData,
-} from './auth';
+export type { SignupResponseData } from './auth';
+
+export type { ApiErrorData, ApiErrorResponse } from './httpClient';

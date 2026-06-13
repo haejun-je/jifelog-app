@@ -92,8 +92,10 @@ export interface DriveFile {
 }
 
 // 일기 관련 타입
+
+// --- 프론트엔드 UI 모델 ---
 export type EmotionKey = 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'anxious' | 'tired';
-export type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'hail' | 'windy';
+export type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'hail' | 'typhoon';
 
 export interface Diary {
   id: string;
@@ -104,8 +106,9 @@ export interface Diary {
   energy: number | null;  // 1~5
   satisfaction: number | null;  // 1~5
   keywords: string[];
-  goodThings: string[];
-  badThings: string[];
+  achievement: string[];
+  regret: string[];
+  images: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -118,22 +121,105 @@ export interface DiaryFormState {
   energy: number | null;
   satisfaction: number | null;
   keywords: string[];
-  goodThings: string[];
-  badThings: string[];
+  achievement: string[];
+  regret: string[];
+  images: string[];
 }
 
-export interface DiaryCreateRequest {
-  date: string;
-  emotion: EmotionKey | null;
-  weather: WeatherKey | null;
-  content: string;
-  energy: number | null;
-  satisfaction: number | null;
+// --- API 모델 (OpenAPI 스펙 매칭) ---
+export type Mood = 'HAPPY' | 'EXCITED' | 'NEUTRAL' | 'SAD' | 'ANGRY' | 'ANXIOUS' | 'TIRED';
+export type Weather = 'SUNNY' | 'CLOUDY' | 'RAIN' | 'SNOW' | 'HAIL' | 'TYPHOON';
+
+export interface CreateDiaryRequest {
+  entryDate: string;          // YYYY-MM-DD
+  mood: Mood;
+  weather: Weather;
+  energyLevel: number;        // 1~5
+  satisfactionLevel: number;  // 1~5
   keywords: string[];
-  goodThings: string[];
-  badThings: string[];
+  achievement: string[];
+  regret: string[];
+  content: string;
+  images?: string[];
 }
 
+export interface CreateDiaryResponse {
+  id: string;  // UUID
+}
+
+// --- EmotionKey ↔ Mood 변환 ---
+const EMOTION_TO_MOOD: Record<EmotionKey, Mood> = {
+  happy: 'HAPPY',
+  excited: 'EXCITED',
+  neutral: 'NEUTRAL',
+  sad: 'SAD',
+  angry: 'ANGRY',
+  anxious: 'ANXIOUS',
+  tired: 'TIRED',
+};
+
+const MOOD_TO_EMOTION: Record<Mood, EmotionKey> = {
+  HAPPY: 'happy',
+  EXCITED: 'excited',
+  NEUTRAL: 'neutral',
+  SAD: 'sad',
+  ANGRY: 'angry',
+  ANXIOUS: 'anxious',
+  TIRED: 'tired',
+};
+
+export function toMood(key: EmotionKey): Mood {
+  return EMOTION_TO_MOOD[key];
+}
+
+export function toEmotionKey(mood: Mood): EmotionKey {
+  return MOOD_TO_EMOTION[mood];
+}
+
+// --- WeatherKey ↔ Weather 변환 ---
+const WEATHER_KEY_TO_API: Record<WeatherKey, Weather> = {
+  sunny: 'SUNNY',
+  cloudy: 'CLOUDY',
+  rainy: 'RAIN',
+  snowy: 'SNOW',
+  hail: 'HAIL',
+  typhoon: 'TYPHOON',
+};
+
+const API_TO_WEATHER_KEY: Record<Weather, WeatherKey> = {
+  SUNNY: 'sunny',
+  CLOUDY: 'cloudy',
+  RAIN: 'rainy',
+  SNOW: 'snowy',
+  HAIL: 'hail',
+  TYPHOON: 'typhoon',
+};
+
+export function toWeatherEnum(key: WeatherKey): Weather {
+  return WEATHER_KEY_TO_API[key];
+}
+
+export function toWeatherKey(weather: Weather): WeatherKey {
+  return API_TO_WEATHER_KEY[weather];
+}
+
+// --- DiaryFormState → CreateDiaryRequest 변환 ---
+export function formStateToCreateRequest(form: DiaryFormState): CreateDiaryRequest {
+  return {
+    entryDate: form.date,
+    mood: toMood(form.emotion ?? 'neutral'),
+    weather: toWeatherEnum(form.weather ?? 'sunny'),
+    energyLevel: form.energy ?? 3,
+    satisfactionLevel: form.satisfaction ?? 3,
+    keywords: form.keywords,
+    achievement: form.achievement,
+    regret: form.regret,
+    content: form.content,
+    images: form.images,
+  };
+}
+
+// --- 기존 호환성 (deprecated, 점진적 마이그레이션용) ---
 export interface DiaryUpdateRequest {
   date?: string;
   emotion?: EmotionKey | null;
@@ -142,6 +228,7 @@ export interface DiaryUpdateRequest {
   energy?: number | null;
   satisfaction?: number | null;
   keywords?: string[];
-  goodThings?: string[];
-  badThings?: string[];
+  achievement?: string[];
+  regret?: string[];
+  images?: string[];
 }

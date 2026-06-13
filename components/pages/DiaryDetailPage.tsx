@@ -1,10 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Pencil, Trash2, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { Diary } from '../../types';
-import { getDiaryById, deleteDiary } from '../../api/diaryMock';
+import { getDiaryById } from '../../api/diaryMock';
+import { deleteDiary, ApiError } from '../../api/diary';
 import { EMOTION_OPTIONS, WEATHER_OPTIONS } from '../diary/diaryOptions';
 import UniversalHeader from '../layout/UniversalHeader';
+
+const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
+  const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const mouseStartX = useRef<number | null>(null);
+
+  const prev = () => setIndex((i) => Math.max(i - 1, 0));
+  const next = () => setIndex((i) => Math.min(i + 1, images.length - 1));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = touchStartX.current - e.changedTouches[0].clientX;
+    if (delta > 40) next();
+    else if (delta < -40) prev();
+    touchStartX.current = null;
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    mouseStartX.current = e.clientX;
+  };
+  const onMouseUp = (e: React.MouseEvent) => {
+    if (mouseStartX.current === null) return;
+    const delta = mouseStartX.current - e.clientX;
+    if (delta > 40) next();
+    else if (delta < -40) prev();
+    mouseStartX.current = null;
+  };
+
+  return (
+    <div
+      className="relative w-full h-52 overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+    >
+      <div
+        className="flex h-full w-full transition-transform duration-300 ease-out"
+        style={{ transform: `translateX(-${index * 100}%)` }}
+      >
+        {images.map((src, i) => (
+          <div key={i} className="w-full h-full flex-shrink-0">
+            <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" draggable={false} />
+          </div>
+        ))}
+      </div>
+
+      {images.length > 1 && (
+        <span className="absolute top-2.5 right-2.5 text-[11px] font-semibold bg-black/50 text-white px-2 py-0.5 rounded-full">
+          {index + 1} / {images.length}
+        </span>
+      )}
+
+      {images.length > 1 && (
+        <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              className={`h-1.5 rounded-full transition-all duration-200 ${
+                i === index ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SATISFACTION_LABELS: Record<number, string> = {
   1: '매우 불만족',
@@ -58,8 +131,16 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
       await deleteDiary(id);
       onDeleted();
     } catch (e: unknown) {
-      const err = e as Error;
-      alert(err.message ?? '삭제에 실패했습니다.');
+      if (e instanceof ApiError) {
+        if (e.errorCode === 'EN_02_001') {
+          alert('존재하지 않는 일기입니다.');
+        } else {
+          alert(e.message);
+        }
+      } else {
+        const err = e as Error;
+        alert(err.message ?? '삭제에 실패했습니다.');
+      }
       setIsDeleting(false);
       setIsDeleteConfirm(false);
     }
@@ -152,6 +233,26 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
                 </h2>
               </div>
 
+              {/* 사진 */}
+              {diary.images.length > 0 && (
+                <div className="rounded-2xl overflow-hidden">
+                  <ImageCarousel images={diary.images} />
+                </div>
+              )}
+
+              {/* 오늘 하루 */}
+              <div className="flex-1 flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 overflow-hidden">
+                {diary.content ? (
+                  <p className="flex-1 px-4 py-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+                    {diary.content}
+                  </p>
+                ) : (
+                  <p className="flex-1 px-4 py-3 text-sm text-slate-400 dark:text-slate-500 italic">
+                    내용이 없습니다.
+                  </p>
+                )}
+              </div>
+
               {/* 감정 & 날씨 & 에너지 & 만족도 */}
               <div className="grid grid-cols-2 gap-3">
                 {emotionOption && (
@@ -224,20 +325,20 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
               )}
 
               {/* 회고 */}
-              {(diary.goodThings.length > 0 || diary.badThings.length > 0) && (
+              {(diary.achievement.length > 0 || diary.regret.length > 0) && (
                 <div className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-4">
                     회고
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    {diary.goodThings.length > 0 && (
+                    {diary.achievement.length > 0 && (
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400">
                           <ThumbsUp size={14} />
                           <span>잘한 일</span>
                         </div>
                         <ul className="space-y-1.5">
-                          {diary.goodThings.map((item, i) => (
+                          {diary.achievement.map((item, i) => (
                             <li key={i} className="text-sm text-slate-700 dark:text-slate-200 flex items-start gap-2">
                               <span className="text-teal-500 mt-0.5">·</span>
                               {item}
@@ -246,17 +347,17 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
                         </ul>
                       </div>
                     )}
-                    {diary.goodThings.length > 0 && diary.badThings.length > 0 && (
+                    {diary.achievement.length > 0 && diary.regret.length > 0 && (
                       <div className="hidden sm:block w-px bg-slate-200 dark:bg-slate-700" />
                     )}
-                    {diary.badThings.length > 0 && (
+                    {diary.regret.length > 0 && (
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
                           <ThumbsDown size={14} />
                           <span>아쉬운 일</span>
                         </div>
                         <ul className="space-y-1.5">
-                          {diary.badThings.map((item, i) => (
+                          {diary.regret.map((item, i) => (
                             <li key={i} className="text-sm text-slate-700 dark:text-slate-200 flex items-start gap-2">
                               <span className="text-slate-400 mt-0.5">·</span>
                               {item}
@@ -268,22 +369,6 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
                   </div>
                 </div>
               )}
-
-              {/* 일기 본문 */}
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
-                  오늘 하루
-                </p>
-                {diary.content ? (
-                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
-                    {diary.content}
-                  </p>
-                ) : (
-                  <p className="text-sm text-slate-400 dark:text-slate-500 italic">
-                    내용이 없습니다.
-                  </p>
-                )}
-              </div>
             </motion.div>
           )}
         </div>

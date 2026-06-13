@@ -16,7 +16,7 @@ export const WEATHER_OPTIONS = [
   { key: 'rainy',  icon: CloudRain, label: '비' },
   { key: 'snowy',  icon: CloudSnow, label: '눈' },
   { key: 'hail',   icon: CloudHail, label: '우박' },
-  { key: 'windy',  icon: Wind,      label: '태풍' },
+  { key: 'typhoon', icon: Wind,     label: '태풍' },
 ] as const;
 
 export type EmotionOption = typeof EMOTION_OPTIONS[number];
