@@ -1,4 +1,4 @@
-import { Diary, DiaryCreateRequest, DiaryUpdateRequest, EmotionKey, WeatherKey } from '../types';
+import { Diary, DiaryUpdateRequest, EmotionKey, WeatherKey } from '../types';
 
 // 인메모리 목업 저장소
 let mockDiaries: Diary[] = [
@@ -11,8 +11,13 @@ let mockDiaries: Diary[] = [
     energy: 4,
     satisfaction: 5,
     keywords: ['친구', '카페', '휴식'],
-    goodThings: ['오랜 친구와 시간을 보냄', '산책 30분'],
-    badThings: ['저녁을 너무 많이 먹음'],
+    achievement: ['오랜 친구와 시간을 보냄', '산책 30분'],
+    regret: ['저녁을 너무 많이 먹음'],
+    images: [
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=400&fit=crop',
+    ],
     createdAt: '2026-04-04T10:00:00Z',
     updatedAt: '2026-04-04T10:00:00Z',
   },
@@ -25,8 +30,12 @@ let mockDiaries: Diary[] = [
     energy: 2,
     satisfaction: 3,
     keywords: ['회의', '야근'],
-    goodThings: ['프로젝트 마감 성공'],
-    badThings: ['수면 부족', '운동 못함'],
+    achievement: ['프로젝트 마감 성공'],
+    regret: ['수면 부족', '운동 못함'],
+    images: [
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1497366216548-3d5c0e71c00e?w=800&h=400&fit=crop',
+    ],
     createdAt: '2026-04-03T22:30:00Z',
     updatedAt: '2026-04-03T22:30:00Z',
   },
@@ -39,8 +48,11 @@ let mockDiaries: Diary[] = [
     energy: 5,
     satisfaction: 4,
     keywords: ['회의', '공부'],
-    goodThings: ['팀원들과 좋은 출발'],
-    badThings: [],
+    achievement: ['팀원들과 좋은 출발'],
+    regret: [],
+    images: [
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop',
+    ],
     createdAt: '2026-04-01T14:00:00Z',
     updatedAt: '2026-04-01T14:00:00Z',
   },
@@ -53,8 +65,12 @@ let mockDiaries: Diary[] = [
     energy: 2,
     satisfaction: 2,
     keywords: ['휴식'],
-    goodThings: ['영화 두 편 봄'],
-    badThings: ['하루 종일 집에만 있음', '생산성 제로'],
+    achievement: ['영화 두 편 봄'],
+    regret: ['하루 종일 집에만 있음', '생산성 제로'],
+    images: [
+      'https://images.unsplash.com/photo-1515694346937-94d136942782?w=800&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1501691223387-dd0500403074?w=800&h=400&fit=crop',
+    ],
     createdAt: '2026-03-30T18:00:00Z',
     updatedAt: '2026-03-30T18:00:00Z',
   },
@@ -62,13 +78,14 @@ let mockDiaries: Diary[] = [
     id: '5',
     date: '2026-03-28',
     emotion: 'neutral' as EmotionKey,
-    weather: 'windy' as WeatherKey,
+    weather: 'typhoon' as WeatherKey,
     content: '',
     energy: 3,
     satisfaction: null,
     keywords: [],
-    goodThings: [],
-    badThings: [],
+    achievement: [],
+    regret: [],
+    images: [],
     createdAt: '2026-03-28T09:00:00Z',
     updatedAt: '2026-03-28T09:00:00Z',
   },
@@ -89,11 +106,20 @@ export function getDiaryById(id: string): Promise<Diary> {
   return Promise.resolve({ ...diary });
 }
 
-export function createDiary(payload: DiaryCreateRequest): Promise<Diary> {
+export function createDiary(payload: DiaryUpdateRequest): Promise<Diary> {
   const now = new Date().toISOString();
   const newDiary: Diary = {
     id: String(nextId++),
-    ...payload,
+    date: payload.date ?? new Date().toISOString().slice(0, 10),
+    emotion: payload.emotion ?? null,
+    weather: payload.weather ?? null,
+    content: payload.content ?? '',
+    energy: payload.energy ?? null,
+    satisfaction: payload.satisfaction ?? null,
+    keywords: payload.keywords ?? [],
+    achievement: payload.achievement ?? [],
+    regret: payload.regret ?? [],
+    images: payload.images ?? [],
     createdAt: now,
     updatedAt: now,
   };

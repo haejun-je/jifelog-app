@@ -1,8 +1,9 @@
-type Profile = 'dev' | 'prod';
+type Profile = 'local' | 'dev' | 'prod';
 
-const profile = import.meta.env.MODE as Profile;
+const profile = (import.meta.env.MODE ?? 'local') as Profile;
 
 const hostMap: Record<Profile, string> = {
+  local: '',
   dev: 'https://dev-gateway.jifelog.com',
   prod: 'https://gateway.jifelog.com',
 };
