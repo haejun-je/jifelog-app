@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, X } from 'lucide-react';
 import { useDiaryForm } from '../../hooks/useDiaryForm';
@@ -13,9 +13,18 @@ import UniversalHeader from '../layout/UniversalHeader';
 interface DiaryWritePageProps {
   onBack: () => void;
   onSaved: () => void;
+  initialContent?: string;
+  initialAchievement?: string[];
+  initialRegret?: string[];
 }
 
-const DiaryWritePage: React.FC<DiaryWritePageProps> = ({ onBack, onSaved }) => {
+const DiaryWritePage: React.FC<DiaryWritePageProps> = ({
+  onBack,
+  onSaved,
+  initialContent,
+  initialAchievement,
+  initialRegret,
+}) => {
   const {
     date, setDate,
     emotion, setEmotion,
@@ -29,12 +38,33 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({ onBack, onSaved }) => {
     images, setImages,
     isSubmitting, submitError, canSubmit,
     handleCreate,
-  } = useDiaryForm({ onCreateSuccess: onSaved });
+  } = useDiaryForm({
+    onCreateSuccess: onSaved,
+    initialValues: {
+      content: initialContent ?? '',
+      achievement: initialAchievement,
+      regret: initialRegret,
+    },
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const shouldScrollToEndRef = useRef(false);
 
   const MAX_IMAGES = 9;
   const [loadingImagesCount, setLoadingImagesCount] = useState(0);
+
+  useEffect(() => {
+    if (shouldScrollToEndRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: scrollContainerRef.current.scrollWidth,
+        behavior: 'smooth',
+      });
+      if (loadingImagesCount === 0) {
+        shouldScrollToEndRef.current = false;
+      }
+    }
+  }, [images, loadingImagesCount]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -43,6 +73,7 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({ onBack, onSaved }) => {
     const filesToProcess = Math.min(files.length, remaining);
     if (filesToProcess <= 0) return;
 
+    shouldScrollToEndRef.current = true;
     setLoadingImagesCount(filesToProcess);
     const newImages: string[] = [];
     let completedCount = 0;
@@ -102,13 +133,13 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({ onBack, onSaved }) => {
                 <label className="block text-[11px] font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
                   사진
                 </label>
-                <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">
                   {images.length}/{MAX_IMAGES}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div ref={scrollContainerRef} className="flex gap-3 overflow-x-auto no-scrollbar">
                 {images.map((img, i) => (
-                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden group">
+                  <div key={i} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden group">
                     <img
                       src={img}
                       alt=""
@@ -127,13 +158,13 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({ onBack, onSaved }) => {
                   </div>
                 ))}
                 {Array.from({ length: loadingImagesCount }).map((_, i) => (
-                  <div key={`loading-${i}`} className="aspect-square rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                  <div key={`loading-${i}`} className="w-24 h-24 flex-shrink-0 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
                 ))}
                 {images.length < MAX_IMAGES && (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:border-teal-400 hover:text-teal-500 transition-colors"
+                    className="w-24 h-24 flex-shrink-0 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:border-teal-400 hover:text-teal-500 transition-colors"
                   >
                     <Camera size={20} />
                     <span className="text-[10px] font-medium">사진 추가</span>

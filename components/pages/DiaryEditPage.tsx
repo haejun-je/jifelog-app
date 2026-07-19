@@ -21,6 +21,8 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
   const [isLoadingDiary, setIsLoadingDiary] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const shouldScrollToEndRef = useRef(false);
   const MAX_IMAGES = 9;
   const [loadingImagesCount, setLoadingImagesCount] = useState(0);
 
@@ -67,6 +69,18 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  useEffect(() => {
+    if (shouldScrollToEndRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: scrollContainerRef.current.scrollWidth,
+        behavior: 'smooth',
+      });
+      if (loadingImagesCount === 0) {
+        shouldScrollToEndRef.current = false;
+      }
+    }
+  }, [images, loadingImagesCount]);
+
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -74,6 +88,7 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
     const filesToProcess = Math.min(files.length, remaining);
     if (filesToProcess <= 0) return;
 
+    shouldScrollToEndRef.current = true;
     setLoadingImagesCount(filesToProcess);
 
     Array.from<File>(files).slice(0, filesToProcess).forEach((file) => {
@@ -141,12 +156,17 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
 
               {/* 사진 */}
               <section className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-5">
-                <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-3">
-                  사진 {images.length}/{MAX_IMAGES}
-                </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
+                    사진
+                  </label>
+                  <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                    {images.length}/{MAX_IMAGES}
+                  </span>
+                </div>
+                <div ref={scrollContainerRef} className="flex gap-3 overflow-x-auto no-scrollbar">
                   {images.map((img, i) => (
-                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden group">
+                    <div key={i} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden group">
                       <img
                         src={img}
                         alt=""
@@ -168,14 +188,14 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
                     Array.from({ length: loadingImagesCount }).map((_, i) => (
                       <div
                         key={`loading-${i}`}
-                        className="aspect-square rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse"
+                        className="w-24 h-24 flex-shrink-0 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse"
                       />
                     ))}
                   {images.length < MAX_IMAGES && (
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:border-teal-400 hover:text-teal-500 transition-colors"
+                      className="w-24 h-24 flex-shrink-0 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:border-teal-400 hover:text-teal-500 transition-colors"
                     >
                       <Camera size={20} />
                       <span className="text-[10px] font-medium">사진 추가</span>

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookOpen } from 'lucide-react';
+import { Plus, BookOpen, PenLine, FileEdit } from 'lucide-react';
 import { Diary } from '../../types';
 import { getDiaries } from '../../api/diaryMock';
 import DiaryCard from '../diary/DiaryCard';
@@ -9,10 +9,13 @@ import ScrollAwareFab from '../common/ScrollAwareFab';
 import DiaryWritePage from './DiaryWritePage';
 import DiaryDetailPage from './DiaryDetailPage';
 import DiaryEditPage from './DiaryEditPage';
+import DiaryDraftPage from './DiaryDraftPage';
+import { DiaryDraftResult } from '../../api/diaryDraft';
 
 type DiaryPanel =
   | { type: 'none' }
-  | { type: 'write' }
+  | { type: 'write'; draft?: DiaryDraftResult }
+  | { type: 'writeDraft' }
   | { type: 'detail'; id: string }
   | { type: 'edit'; id: string };
 
@@ -21,6 +24,7 @@ const DiaryListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [panel, setPanel] = useState<DiaryPanel>({ type: 'none' });
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const panelHistoryRef = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
 
@@ -44,6 +48,7 @@ const DiaryListPage: React.FC = () => {
     window.history.pushState({ diaryPanel: true }, '');
     panelHistoryRef.current = true;
     setPanel(next);
+    setIsFabMenuOpen(false);
   };
 
   const closePanel = () => {
@@ -140,11 +145,51 @@ const DiaryListPage: React.FC = () => {
       </main>
 
       <ScrollAwareFab
-        onClick={() => openPanel({ type: 'write' })}
+        onClick={() => setIsFabMenuOpen((prev) => !prev)}
         ariaLabel="일기 작성"
       >
         <Plus size={28} />
       </ScrollAwareFab>
+
+      <AnimatePresence>
+        {isFabMenuOpen && (
+          <>
+            <motion.div
+              key="fab-menu-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setIsFabMenuOpen(false)}
+              className="fixed inset-0 z-30 bg-black/20 dark:bg-black/40"
+            />
+            <motion.div
+              key="fab-menu"
+              initial={{ opacity: 0, y: 12, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="fixed right-6 bottom-44 z-40 w-44 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 shadow-2xl"
+            >
+              <button
+                onClick={() => openPanel({ type: 'write' })}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                <PenLine size={18} className="text-teal-500" />
+                일기 작성
+              </button>
+              <div className="h-px bg-slate-100 dark:bg-slate-800" />
+              <button
+                onClick={() => openPanel({ type: 'writeDraft' })}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                <FileEdit size={18} className="text-teal-500" />
+                일기 초안 작성
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {panel.type !== 'none' && (
@@ -160,6 +205,15 @@ const DiaryListPage: React.FC = () => {
               <DiaryWritePage
                 onBack={closePanel}
                 onSaved={() => { loadDiaries(); closePanel(); }}
+                initialContent={panel.draft?.content}
+                initialAchievement={panel.draft?.achievement}
+                initialRegret={panel.draft?.regret}
+              />
+            )}
+            {panel.type === 'writeDraft' && (
+              <DiaryDraftPage
+                onBack={closePanel}
+                onDraftGenerated={(draft) => openPanel({ type: 'write', draft })}
               />
             )}
             {panel.type === 'detail' && (
