@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
         proxy: {
+          '/platform': {
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+          },
           '/v1': {
             target: 'http://localhost:8080',
             changeOrigin: true,
