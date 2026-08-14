@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout, HardDrive, Calendar, Bot, Settings, BookOpen } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const GlobalSidebar: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const menuItems = [
         { label: '피드', icon: Layout, path: '/feed' },
@@ -14,19 +16,23 @@ const GlobalSidebar: React.FC = () => {
         { label: '일기', icon: BookOpen, path: '/diary' },
     ];
 
+    const profileImage = user?.profileImg || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100";
+
     return (
         <aside className="fixed top-0 left-0 bottom-0 w-16 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-white/5 z-[100] hidden md:flex flex-col items-center py-4 transition-colors">
             {/* User Profile */}
             <div
                 className="w-10 h-10 rounded-full overflow-hidden mb-8 border-2 border-slate-100 dark:border-slate-800 cursor-pointer hover:ring-2 hover:ring-teal-500/50 transition-all flex-shrink-0"
                 onClick={() => navigate('/settings')}
+                title={user?.nickname ? `${user.nickname} (${user.username})` : '프로필 설정'}
             >
                 <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100"
-                    alt="Profile"
+                    src={profileImage}
+                    alt={user?.nickname || "Profile"}
                     className="w-full h-full object-cover"
                 />
             </div>
+
 
             <div className="flex-1 flex flex-col gap-3 w-full px-2">
                 {menuItems.map((item) => {

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertCircle, ArrowLeft, Lock, Mail } from 'lucide-react';
 import { ApiError, login } from '../../api/auth';
+import { useAuth } from '../../contexts/AuthContext';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,6 +13,7 @@ function validateEmail(value: string): boolean {
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { refetch } = useAuth();
   const [email, setEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [password, setPassword] = useState('');
@@ -32,6 +34,7 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
+      await refetch();
       navigate('/');
     } catch (err) {
       setLoginError(err instanceof ApiError ? err.message : '네트워크 오류가 발생했습니다.');
@@ -39,6 +42,7 @@ const LoginPage: React.FC = () => {
       setIsLoggingIn(false);
     }
   };
+
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#061019] text-slate-100">

@@ -219,7 +219,6 @@ export function formStateToCreateRequest(form: DiaryFormState): CreateDiaryReque
   };
 }
 
-// --- 기존 호환성 (deprecated, 점진적 마이그레이션용) ---
 export interface DiaryUpdateRequest {
   date?: string;
   emotion?: EmotionKey | null;
@@ -232,3 +231,12 @@ export interface DiaryUpdateRequest {
   regret?: string[];
   images?: string[];
 }
+
+// --- 계정 / 사용자 관련 타입 ---
+export interface Account {
+  id: string;
+  nickname: string;
+  username: string;
+  profileImg: string;
+}
+

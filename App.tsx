@@ -21,8 +21,10 @@ import FeedPage from './components/pages/FeedPage';
 import DiaryListPage from './components/pages/DiaryListPage';
 import AIChatPage from './components/pages/AIChatPage';
 import { CalendarProvider } from './components/pages/calendar/CalendarContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 import MainLayout from './components/layout/MainLayout';
+
 
 const SlideOverlayRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -213,19 +215,20 @@ const App: React.FC = () => {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage onLogin={openLogin} onSignup={openSignup} onSettings={navigateToSettings} navigateToCalendar={navigateToCalendar} navigateToBookmark={navigateToBookmark} navigateToFeed={navigateToFeed} />} />
-          <Route path="/drive" element={<MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout>} />
-          <Route path="/drive/recent" element={<MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout>} />
-          <Route path="/drive/nodes" element={<MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout>} />
-          <Route path="/bookmarks" element={<MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout>} />
-          <Route path="/calendar" element={<MainLayout><CalendarProvider><CalendarPage onBack={navigateToDrive} /></CalendarProvider></MainLayout>} />
-          <Route path="/feed" element={<MainLayout><FeedPage /></MainLayout>} />
-          <Route path="/diary" element={<MainLayout><DiaryListPage /></MainLayout>} />
-          <Route path="/ai" element={<MainLayout><AIChatPage /></MainLayout>} />
-          <Route path="/settings" element={<SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} />} />
+          <Route path="/drive" element={<ProtectedRoute><MainLayout><DrivePage onBack={navigateToHome} onSeeAllRecent={navigateToRecentFiles} onSeeAllNodes={navigateToNodes} /></MainLayout></ProtectedRoute>} />
+          <Route path="/drive/recent" element={<ProtectedRoute><MainLayout><RecentFilesPage onBack={navigateToDrive} /></MainLayout></ProtectedRoute>} />
+          <Route path="/drive/nodes" element={<ProtectedRoute><MainLayout><NodesPage onBack={navigateToDrive} /></MainLayout></ProtectedRoute>} />
+          <Route path="/bookmarks" element={<ProtectedRoute><MainLayout><BookmarkPage onBack={navigateToDrive} /></MainLayout></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><MainLayout><CalendarProvider><CalendarPage onBack={navigateToDrive} /></CalendarProvider></MainLayout></ProtectedRoute>} />
+          <Route path="/feed" element={<ProtectedRoute><MainLayout><FeedPage /></MainLayout></ProtectedRoute>} />
+          <Route path="/diary" element={<ProtectedRoute><MainLayout><DiaryListPage /></MainLayout></ProtectedRoute>} />
+          <Route path="/ai" element={<ProtectedRoute><MainLayout><AIChatPage /></MainLayout></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage onBack={navigateToHome} theme={theme} onThemeChange={setTheme} /></ProtectedRoute>} />
 
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Routes>
+
       </AnimatePresence>
     </div>
   );
