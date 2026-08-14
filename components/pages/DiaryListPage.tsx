@@ -40,50 +40,25 @@ const DiaryListPage: React.FC = () => {
     }
   }, []);
 
+  const openPanel = useCallback((next: DiaryPanel) => {
+    setPanel(next);
+  }, []);
+
+  const closePanel = useCallback(() => {
+    setPanel({ type: 'none' });
+  }, []);
+
   useEffect(() => {
     loadDiaries();
   }, [loadDiaries]);
 
-  const openPanel = (next: DiaryPanel) => {
-    window.history.pushState({ diaryPanel: true }, '');
-    panelHistoryRef.current = true;
-    setPanel(next);
-    setIsFabMenuOpen(false);
-  };
-
-  const closePanel = () => {
-    panelHistoryRef.current = false;
-    setPanel({ type: 'none' });
-  };
-
-  useEffect(() => {
-    const handlePopState = () => {
-      if (panel.type !== 'none') {
-        closePanel();
-      }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [panel]);
-
-  useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
-    if (panel.type !== 'none') {
-      el.style.overflowY = 'hidden';
-    } else {
-      el.style.overflowY = '';
-    }
-    return () => {
-      el.style.overflowY = '';
-    };
-  }, [panel.type]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] transition-colors flex flex-col">
       <UniversalHeader title="일기" showBack={false} />
 
       <main ref={mainRef} data-fab-scroll-container className="flex-1 overflow-y-auto w-full">
+
         <div className="max-w-3xl mx-auto px-4 md:px-5 pt-[calc(4rem+1.25rem)] md:pt-[calc(4rem+1.5rem)] pb-24">
           {isLoading && (
             <div className="flex justify-center py-16">
