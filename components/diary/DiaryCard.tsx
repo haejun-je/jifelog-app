@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Diary } from '../../types';
+import { DiaryListItem, toEmotionKey, toWeatherKey } from '../../types';
 import { EMOTION_OPTIONS, WEATHER_OPTIONS } from './diaryOptions';
 
 interface DiaryCardProps {
-  diary: Diary;
+  diary: DiaryListItem;
   onClick: (id: string) => void;
   index?: number;
 }
@@ -17,12 +17,12 @@ const DiaryCard: React.FC<DiaryCardProps> = ({ diary, onClick, index = 0 }) => {
     weekday: 'short',
   });
 
-  const emotionOption = diary.emotion
-    ? EMOTION_OPTIONS.find((o) => o.key === diary.emotion)
+  const emotionOption = diary.mood
+    ? EMOTION_OPTIONS.find((o) => o.key === toEmotionKey(diary.mood))
     : null;
 
   const weatherOption = diary.weather
-    ? WEATHER_OPTIONS.find((o) => o.key === diary.weather)
+    ? WEATHER_OPTIONS.find((o) => o.key === toWeatherKey(diary.weather))
     : null;
 
   return (
@@ -69,27 +69,9 @@ const DiaryCard: React.FC<DiaryCardProps> = ({ diary, onClick, index = 0 }) => {
       </div>
 
       <div className="flex gap-3">
-        {diary.images.length === 1 && (
+        {diary.imageUrl && (
           <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden">
-            <img src={diary.images[0]} alt="" className="w-full h-full object-cover" />
-          </div>
-        )}
-        {diary.images.length === 2 && (
-          <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden flex">
-            <img
-              src={diary.images[0]}
-              alt=""
-              className="w-7 h-14 object-cover border-r border-slate-200 dark:border-slate-600"
-            />
-            <img src={diary.images[1]} alt="" className="w-7 h-14 object-cover" />
-          </div>
-        )}
-        {diary.images.length >= 3 && (
-          <div className="relative flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden">
-            <img src={diary.images[0]} alt="" className="w-full h-full object-cover" />
-            <span className="absolute bottom-0 right-0 bg-black/60 text-white text-[10px] font-bold px-1 leading-4 rounded-tl-md">
-              +{diary.images.length - 1}
-            </span>
+            <img src={diary.imageUrl} alt="" className="w-full h-full object-cover" />
           </div>
         )}
         <div className="min-w-0 flex-1">

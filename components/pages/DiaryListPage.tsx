@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, BookOpen, PenLine, FileEdit } from 'lucide-react';
-import { Diary } from '../../types';
-import { getDiaries } from '../../api/diaryMock';
+import { DiaryListItem } from '../../types';
+import { getDiaries } from '../../api/diary';
 import DiaryCard from '../diary/DiaryCard';
 import UniversalHeader from '../layout/UniversalHeader';
 import ScrollAwareFab from '../common/ScrollAwareFab';
@@ -20,13 +20,14 @@ type DiaryPanel =
   | { type: 'edit'; id: string };
 
 const DiaryListPage: React.FC = () => {
-  const [diaries, setDiaries] = useState<Diary[]>([]);
+  const [diaries, setDiaries] = useState<DiaryListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [panel, setPanel] = useState<DiaryPanel>({ type: 'none' });
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const panelHistoryRef = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
+  const initialLoadStartedRef = useRef(false);
 
   const loadDiaries = useCallback(async () => {
     try {
@@ -48,7 +49,11 @@ const DiaryListPage: React.FC = () => {
     setPanel({ type: 'none' });
   }, []);
 
+  // StrictMode(dev)에서 마운트 이펙트가 두 번 실행되어 목록 조회가 중복 호출되는 것을 방지.
+  // AuthContext의 초기 세션 조회와 동일한 패턴.
   useEffect(() => {
+    if (initialLoadStartedRef.current) return;
+    initialLoadStartedRef.current = true;
     loadDiaries();
   }, [loadDiaries]);
 

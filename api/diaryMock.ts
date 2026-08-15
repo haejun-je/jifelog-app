@@ -93,13 +93,6 @@ let mockDiaries: Diary[] = [
 
 let nextId = 6;
 
-export function getDiaries(): Promise<Diary[]> {
-  const sorted = [...mockDiaries].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-  return Promise.resolve(sorted);
-}
-
 export function getDiaryById(id: string): Promise<Diary> {
   const diary = mockDiaries.find((d) => d.id === id);
   if (!diary) return Promise.reject(new Error('일기를 찾을 수 없습니다.'));

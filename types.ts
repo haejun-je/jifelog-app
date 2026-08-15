@@ -148,6 +148,18 @@ export interface CreateDiaryResponse {
   id: string;  // UUID
 }
 
+// --- 일기 목록 조회 응답 ---
+export interface DiaryListItem {
+  id: string;
+  date: string;           // YYYY-MM-DD
+  mood: Mood;
+  weather: Weather;
+  satisfaction: number | null;
+  keywords: string[];
+  content: string;
+  imageUrl: string | null;
+}
+
 // --- 사진 사전서명 업로드 URL 요청/응답 ---
 export interface CreatePhotoUploadUrlRequest {
   fileName: string;
