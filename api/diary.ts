@@ -4,6 +4,7 @@ import {
   CreateDiaryResponse,
   CreatePhotoUploadUrlRequest,
   CreatePhotoUploadUrlResponse,
+  DiaryListItem,
   PresignedFormData,
 } from '../types';
 import { apiRequest, ApiError, parseErrorResponse } from './httpClient';
@@ -27,6 +28,16 @@ export async function createDiary(payload: CreateDiaryRequest): Promise<CreateDi
   return apiRequest<CreateDiaryResponse>(diaryUrl(''), {
     method: 'POST',
     json: payload,
+  });
+}
+
+/**
+ * 일기 목록 조회
+ * GET {apiHost}/platform/api/v1/diaries
+ */
+export async function getDiaries(): Promise<DiaryListItem[]> {
+  return apiRequest<DiaryListItem[]>(diaryUrl(''), {
+    method: 'GET',
   });
 }
 
