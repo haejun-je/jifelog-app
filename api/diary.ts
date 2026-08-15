@@ -7,6 +7,7 @@ import {
   PresignedFormData,
 } from '../types';
 import { apiRequest, ApiError, parseErrorResponse } from './httpClient';
+import { toSnakeCase } from './caseConverter';
 
 const DIARY_API_PREFIX = '/platform/api/v1/diaries';
 
@@ -44,7 +45,7 @@ export async function createPhotoUploadUrl(
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(toSnakeCase(payload)),
   });
 
   if (!res.ok) {
