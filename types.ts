@@ -140,11 +140,39 @@ export interface CreateDiaryRequest {
   achievement: string[];
   regret: string[];
   content: string;
-  images?: string[];
+  images?: string[];          // 레거시/호환용 (선택)
+  objectKeys?: string[];      // 업로드 완료된 이미지 object key 목록
 }
 
 export interface CreateDiaryResponse {
   id: string;  // UUID
+}
+
+// --- 사진 사전서명 업로드 URL 요청/응답 ---
+export interface CreatePhotoUploadUrlRequest {
+  fileName: string;
+  contentType: string;
+  entryDate: string;          // YYYY-MM-DD
+}
+
+/**
+ * MinIO 사전서명 POST 정책의 form 필드.
+ * 백엔드 응답 키(x-amz-*, policy, key 등)는 변환 규칙상 보존되므로 그대로 사용한다.
+ */
+export interface PresignedFormData {
+  key: string;
+  policy: string;
+  'x-amz-algorithm': string;
+  'x-amz-credential': string;
+  'x-amz-date': string;
+  'x-amz-signature': string;
+}
+
+export interface CreatePhotoUploadUrlResponse {
+  uploadUrl: string;
+  expiresAt: string;
+  formData: PresignedFormData;
+  maxFileSizeBytes: number;
 }
 
 // --- EmotionKey ↔ Mood 변환 ---
