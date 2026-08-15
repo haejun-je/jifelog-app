@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, X } from 'lucide-react';
 import { useDiaryForm } from '../../hooks/useDiaryForm';
@@ -35,7 +35,7 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({
     keywords, setKeywords,
     achievement, setAchievement,
     regret, setRegret,
-    images, setImages,
+    images, addImages, removeImage,
     isSubmitting, submitError, canSubmit,
     handleCreate,
   } = useDiaryForm({
@@ -52,7 +52,10 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({
   const shouldScrollToEndRef = useRef(false);
 
   const MAX_IMAGES = 9;
-  const [loadingImagesCount, setLoadingImagesCount] = useState(0);
+  const loadingImagesCount = useMemo(
+    () => images.filter((img) => img.status === 'uploading').length,
+    [images],
+  );
 
   useEffect(() => {
     if (shouldScrollToEndRef.current && scrollContainerRef.current) {
@@ -70,33 +73,13 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({
     const files = e.target.files;
     if (!files) return;
     const remaining = MAX_IMAGES - images.length;
-    const filesToProcess = Math.min(files.length, remaining);
-    if (filesToProcess <= 0) return;
+    if (remaining <= 0) return;
+    const filesToProcess = Array.from(files).slice(0, remaining) as File[];
+    if (filesToProcess.length === 0) return;
 
     shouldScrollToEndRef.current = true;
-    setLoadingImagesCount(filesToProcess);
-    const newImages: string[] = [];
-    let completedCount = 0;
-
-    Array.from(files).slice(0, filesToProcess).forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          newImages.push(reader.result);
-        }
-        completedCount++;
-        if (completedCount === filesToProcess) {
-          setImages((prev) => [...prev, ...newImages]);
-          setLoadingImagesCount(0);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    void addImages(filesToProcess, date);
     e.target.value = '';
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -141,16 +124,21 @@ const DiaryWritePage: React.FC<DiaryWritePageProps> = ({
                 {images.map((img, i) => (
                   <div key={i} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden group">
                     <img
-                      src={img}
+                      src={img.previewUrl}
                       alt=""
                       className="w-full h-full object-cover"
                       onLoad={() => {
                         // Image loaded successfully
                       }}
                     />
+                    {img.status === 'error' && (
+                      <div className="absolute inset-x-0 bottom-0 bg-red-500/80 text-white text-[10px] px-1 py-0.5 truncate">
+                        업로드 실패
+                      </div>
+                    )}
                     <button
                       type="button"
-                      onClick={() => handleRemoveImage(i)}
+                      onClick={() => removeImage(i)}
                       className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                     >
                       <X size={14} />
