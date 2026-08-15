@@ -73,20 +73,26 @@ export async function createPhotoUploadUrl(
  * 응답의 `form_data` 모든 필드를 multipart/form-data 파트에 넣고,
  * 마지막에 실제 파일을 `file` 필드로 추가한다.
  * 업로드 대상은 사전서명된 S3 호환 스토리지이므로 인증 쿠키는 포함하지 않는다.
+ *
+ * form_data 키는 백엔드 응답의 원본 키를 그대로 사용한다 (대소문자·하이픈 보존).
  */
 export async function uploadPhotoToMinio(
   uploadUrl: string,
-  formData: PresignedFormData,
+  formData: Record<string, string>,
   file: File,
 ): Promise<void> {
   const body = new FormData();
-  // 사전서명 정책 사양: 키 순서가 의미 있을 수 있으므로 명세된 순서대로 append.
-  body.append('key', formData.key);
-  body.append('policy', formData.policy);
-  body.append('x-amz-algorithm', formData['x-amz-algorithm']);
-  body.append('x-amz-credential', formData['x-amz-credential']);
-  body.append('x-amz-date', formData['x-amz-date']);
-  body.append('x-amz-signature', formData['x-amz-signature']);
+
+  // 백엔드가 준 form_data 키를 그대로 append (대소문자·하이픈 보존)
+  for (const [fieldKey, fieldValue] of Object.entries(formData)) {
+    body.append(fieldKey, fieldValue);
+  }
+
+  // Content-Type 필드 보장 (백엔드 응답에 없을 수 있으므로)
+  if (!body.has('Content-Type') && !body.has('content-type')) {
+    body.append('Content-Type', file.type || 'application/octet-stream');
+  }
+
   body.append('file', file, file.name);
 
   const res = await fetch(uploadUrl, {
