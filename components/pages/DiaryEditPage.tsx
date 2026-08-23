@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, X } from 'lucide-react';
 import { useDiaryForm } from '../../hooks/useDiaryForm';
-import { getDiaryById } from '../../api/diaryMock';
+import { getDiaryById } from '../../api/diary';
+import { toEmotionKey, toWeatherKey } from '../../types';
 import EmotionPicker from '../diary/EmotionPicker';
 import WeatherPicker from '../diary/WeatherPicker';
 import EnergySlider from '../diary/EnergySlider';
@@ -51,16 +52,17 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
       try {
         const diary = await getDiaryById(id);
         initForm({
-          date: diary.date,
-          emotion: diary.emotion,
-          weather: diary.weather,
+          date: diary.entryDate,
+          emotion: diary.mood ? toEmotionKey(diary.mood) : null,
+          weather: diary.weather ? toWeatherKey(diary.weather) : null,
           content: diary.content,
-          energy: diary.energy,
-          satisfaction: diary.satisfaction,
+          energy: diary.energyLevel,
+          satisfaction: diary.satisfactionLevel,
           keywords: diary.keywords,
           achievement: diary.achievement,
           regret: diary.regret,
-          images: diary.images,
+          // 상세 응답에 이미지 필드가 없으므로 빈 배열로 초기화한다.
+          images: [],
         });
       } catch (e: unknown) {
         const err = e as Error;

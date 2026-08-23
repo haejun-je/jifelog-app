@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Pencil, Trash2, ThumbsUp, ThumbsDown, X } from 'lucide-react';
-import { Diary } from '../../types';
-import { getDiaryById } from '../../api/diaryMock';
-import { deleteDiary, ApiError } from '../../api/diary';
+import { Diary, DiaryDetail, toEmotionKey, toWeatherKey } from '../../types';
+import { getDiaryById, deleteDiary, ApiError } from '../../api/diary';
 import { EMOTION_OPTIONS, WEATHER_OPTIONS } from '../diary/diaryOptions';
 import UniversalHeader from '../layout/UniversalHeader';
 
@@ -111,19 +110,49 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
   const [isActionBarVisible, setIsActionBarVisible] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       try {
-        const data = await getDiaryById(id);
-        setDiary(data);
+        const data: DiaryDetail = await getDiaryById(id);
+        if (cancelled) return;
+        // 백엔드 응답(snake_case → camelCase)을 화면 UI 모델로 매핑한다.
+        setDiary({
+          id: data.id,
+          date: data.entryDate,
+          emotion: data.mood ? toEmotionKey(data.mood) : null,
+          weather: data.weather ? toWeatherKey(data.weather) : null,
+          content: data.content,
+          energy: data.energyLevel,
+          satisfaction: data.satisfactionLevel,
+          keywords: data.keywords,
+          achievement: data.achievement,
+          regret: data.regret,
+          // 상세 응답에 이미지 필드가 없으므로 빈 배열로 초기화한다.
+          images: [],
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        });
       } catch (e: unknown) {
+        if (cancelled) return;
+        if (e instanceof ApiError && e.errorCode === 'EN_02_001') {
+          // 존재하지 않는 일기: 사용자에게 알리고 목록으로 돌려보낸다.
+          alert('존재하지 않는 일기입니다.');
+          onBack();
+          return;
+        }
         const err = e as Error;
         setError(err.message ?? '일기를 불러오지 못했습니다.');
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
     load();
-  }, [id]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, onBack]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
