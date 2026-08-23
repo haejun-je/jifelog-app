@@ -61,8 +61,7 @@ const DiaryEditPage: React.FC<DiaryEditPageProps> = ({ id, onBack, onSaved }) =>
           keywords: diary.keywords,
           achievement: diary.achievement,
           regret: diary.regret,
-          // 상세 응답에 이미지 필드가 없으므로 빈 배열로 초기화한다.
-          images: [],
+          images: diary.imageUrls,
         });
       } catch (e: unknown) {
         const err = e as Error;
