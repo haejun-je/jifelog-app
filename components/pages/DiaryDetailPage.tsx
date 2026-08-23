@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Pencil, Trash2, ThumbsUp, ThumbsDown, X } from 'lucide-react';
+import { Pencil, Trash2, ThumbsUp, ThumbsDown, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { Diary, DiaryDetail, toEmotionKey, toWeatherKey } from '../../types';
 import { getDiaryById, deleteDiary, ApiError } from '../../api/diary';
 import { EMOTION_OPTIONS, WEATHER_OPTIONS } from '../diary/diaryOptions';
 import UniversalHeader from '../layout/UniversalHeader';
 
-const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
+const ImageCarousel: React.FC<{ images: string[]; onImageClick?: (index: number) => void }> = ({
+  images,
+  onImageClick,
+}) => {
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const mouseStartX = useRef<number | null>(null);
@@ -49,7 +52,11 @@ const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {images.map((src, i) => (
-          <div key={i} className="w-full h-full flex-shrink-0">
+          <div
+            key={i}
+            className="w-full h-full flex-shrink-0"
+            onClick={() => onImageClick?.(i)}
+          >
             <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" draggable={false} />
           </div>
         ))}
@@ -75,6 +82,172 @@ const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
         </div>
       )}
     </div>
+  );
+};
+
+interface ImageLightboxProps {
+  images: string[];
+  index: number;
+  onIndexChange: (index: number) => void;
+  onClose: () => void;
+  onOpenOriginal: () => void;
+}
+
+const ImageLightbox: React.FC<ImageLightboxProps> = ({
+  images,
+  index,
+  onIndexChange,
+  onClose,
+  onOpenOriginal,
+}) => {
+  const touchStartX = useRef<number | null>(null);
+  const mouseStartX = useRef<number | null>(null);
+
+  const prev = () => onIndexChange(Math.max(index - 1, 0));
+  const next = () => onIndexChange(Math.min(index + 1, images.length - 1));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = touchStartX.current - e.changedTouches[0].clientX;
+    if (delta > 40) next();
+    else if (delta < -40) prev();
+    touchStartX.current = null;
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    mouseStartX.current = e.clientX;
+  };
+  const onMouseUp = (e: React.MouseEvent) => {
+    if (mouseStartX.current === null) return;
+    const delta = mouseStartX.current - e.clientX;
+    if (delta > 40) next();
+    else if (delta < -40) prev();
+    mouseStartX.current = null;
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative z-10 flex h-full w-full flex-col"
+      >
+        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-4">
+          <span className="rounded-full bg-black/30 px-3 py-1 text-sm font-semibold text-white/90">
+            {index + 1} / {images.length}
+          </span>
+          <button
+            onClick={onClose}
+            className="rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              disabled={index === 0}
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20 disabled:opacity-30"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <button
+              onClick={next}
+              disabled={index === images.length - 1}
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20 disabled:opacity-30"
+            >
+              <ChevronRight size={28} />
+            </button>
+          </>
+        )}
+
+        <div
+          className="flex-1 overflow-hidden"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+        >
+          <div
+            className="flex h-full w-full transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${index * 100}%)` }}
+          >
+            {images.map((src, i) => (
+              <div key={i} className="relative h-full w-full flex-shrink-0 flex items-center justify-center p-4">
+                <img src={src} alt="" className="max-h-full max-w-full object-contain" draggable={false} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="absolute bottom-6 left-0 right-0 z-20 flex flex-col items-center gap-4">
+          <button
+            onClick={onOpenOriginal}
+            className="flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+          >
+            <Maximize2 size={16} />
+            원본 보기
+          </button>
+
+          {images.length > 1 && (
+            <div className="flex justify-center gap-1.5">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => onIndexChange(i)}
+                  className={`h-1.5 rounded-full transition-all duration-200 ${
+                    i === index ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+interface OriginalSizeViewerProps {
+  src: string;
+  onClose: () => void;
+}
+
+const OriginalSizeViewer: React.FC<OriginalSizeViewerProps> = ({ src, onClose }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] flex flex-col bg-black/95"
+    >
+      <div className="flex items-center justify-between px-4 py-4">
+        <span className="text-sm font-semibold text-white/90">원본 이미지</span>
+        <button
+          onClick={onClose}
+          className="rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+        >
+          <X size={24} />
+        </button>
+      </div>
+      <div className="flex-1 overflow-auto p-4">
+        <img src={src} alt="" className="max-w-none max-h-none" draggable={false} />
+      </div>
+    </motion.div>
   );
 };
 
@@ -108,6 +281,8 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [isActionBarVisible, setIsActionBarVisible] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -219,6 +394,27 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
     };
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showOriginal) {
+          setShowOriginal(false);
+        } else if (lightboxIndex !== null) {
+          setLightboxIndex(null);
+          setShowOriginal(false);
+        }
+      } else if (!showOriginal && lightboxIndex !== null && diary) {
+        if (e.key === 'ArrowLeft') {
+          setLightboxIndex((i) => Math.max((i ?? 0) - 1, 0));
+        } else if (e.key === 'ArrowRight') {
+          setLightboxIndex((i) => Math.min((i ?? 0) + 1, diary.images.length - 1));
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showOriginal, lightboxIndex, diary]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] transition-colors flex flex-col">
       <UniversalHeader
@@ -264,7 +460,7 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
               {/* 사진 */}
               {diary.images.length > 0 && (
                 <div className="rounded-2xl overflow-hidden">
-                  <ImageCarousel images={diary.images} />
+                  <ImageCarousel images={diary.images} onImageClick={setLightboxIndex} />
                 </div>
               )}
 
@@ -471,6 +667,24 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
               </div>
             </motion.div>
           </div>
+        )}
+        {lightboxIndex !== null && diary && (
+          <ImageLightbox
+            images={diary.images}
+            index={lightboxIndex}
+            onIndexChange={setLightboxIndex}
+            onClose={() => {
+              setLightboxIndex(null);
+              setShowOriginal(false);
+            }}
+            onOpenOriginal={() => setShowOriginal(true)}
+          />
+        )}
+        {showOriginal && lightboxIndex !== null && diary && (
+          <OriginalSizeViewer
+            src={diary.images[lightboxIndex]}
+            onClose={() => setShowOriginal(false)}
+          />
         )}
       </AnimatePresence>
     </div>
