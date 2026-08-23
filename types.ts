@@ -160,6 +160,24 @@ export interface DiaryListItem {
   imageUrl: string | null;
 }
 
+// --- 일기 상세 조회 응답 (GET /diaries/{id}) ---
+export interface DiaryDetail {
+  id: string;                 // UUID
+  userInfoId: string;         // UUID
+  entryDate: string;          // YYYY-MM-DD
+  mood: Mood;
+  weather: Weather;
+  energyLevel: number;        // 1~5
+  satisfactionLevel: number;  // 1~5
+  keywords: string[];
+  achievement: string[];
+  regret: string[];
+  content: string;
+  images: string[];
+  createdAt: string;          // ISO 8601
+  updatedAt: string;          // ISO 8601
+}
+
 // --- 사진 사전서명 업로드 URL 요청/응답 ---
 export interface CreatePhotoUploadUrlRequest {
   fileName: string;

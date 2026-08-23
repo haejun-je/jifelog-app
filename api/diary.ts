@@ -4,6 +4,7 @@ import {
   CreateDiaryResponse,
   CreatePhotoUploadUrlRequest,
   CreatePhotoUploadUrlResponse,
+  DiaryDetail,
   DiaryListItem,
   PresignedFormData,
 } from '../types';
@@ -37,6 +38,20 @@ export async function createDiary(payload: CreateDiaryRequest): Promise<CreateDi
  */
 export async function getDiaries(): Promise<DiaryListItem[]> {
   return apiRequest<DiaryListItem[]>(diaryUrl(''), {
+    method: 'GET',
+  });
+}
+
+/**
+ * 일기 상세 조회
+ * GET {apiHost}/platform/api/v1/diaries/{id}
+ *
+ * 응답은 snake_case로 오지만 `apiRequest` 내부에서 camelCase로 자동 변환된다.
+ * - 404: ApiError(`EN_02_001`, "존재하지 않는 일기입니다.")
+ * - 500: ApiError(`ES_00_001`, "서버 오류가 발생했습니다.")
+ */
+export async function getDiaryById(id: string): Promise<DiaryDetail> {
+  return apiRequest<DiaryDetail>(diaryUrl(`/${id}`), {
     method: 'GET',
   });
 }
