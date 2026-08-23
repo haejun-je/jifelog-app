@@ -173,7 +173,7 @@ export interface DiaryDetail {
   achievement: string[];
   regret: string[];
   content: string;
-  images: string[];
+  imageUrls: string[];
   createdAt: string;          // ISO 8601
   updatedAt: string;          // ISO 8601
 }

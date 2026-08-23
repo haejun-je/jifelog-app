@@ -128,8 +128,7 @@ const DiaryDetailPage: React.FC<DiaryDetailPageProps> = ({ id, onBack, onEdit, o
           keywords: data.keywords,
           achievement: data.achievement,
           regret: data.regret,
-          // 상세 응답에 이미지 필드가 없으므로 빈 배열로 초기화한다.
-          images: [],
+          images: data.imageUrls,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
         });
